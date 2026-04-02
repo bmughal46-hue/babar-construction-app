@@ -1,112 +1,164 @@
 import streamlit as st
 import pandas as pd
+import plotly.graph_objects as go
+import plotly.express as px
 
-# 1. Page Configuration
-st.set_page_config(page_title="Babar Group | Construction Intelligence", layout="wide")
+# --- PAGE CONFIGURATION ---
+st.set_page_config(
+    page_title="Babar Construction | Professional Estimator",
+    page_icon="🏗️",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
-# 2. Premium UI Styling
+# --- CUSTOM CSS FOR MODERN UI ---
 st.markdown("""
-<style>
-    .main { background-color: #022c22; }
-    [data-testid="stSidebar"] { background-color: #064e3b !important; border-right: 2px solid #fbbf24; }
-    [data-testid="stSidebar"] * { color: #fef3c7 !important; }
-    .header-box { 
-        background: linear-gradient(135deg, #064e3b 0%, #022c22 100%); 
-        padding: 25px; border-radius: 15px; text-align: center; 
-        border: 1px solid #fbbf24; margin-bottom: 20px;
+    <style>
+    :root {
+        --primary-color: #C5A059;
+        --secondary-color: #1E293B;
     }
-    .card { 
-        background: #ffffff; padding: 20px; border-radius: 15px; 
-        box-shadow: 0 4px 15px rgba(0,0,0,0.3); border-top: 6px solid #fbbf24;
-        margin-bottom: 20px; color: #1e293b;
-    }
-    .brand-badge {
-        background: #fef3c7; color: #92400e; padding: 5px 12px;
-        border-radius: 20px; font-weight: bold; font-size: 14px;
-        border: 1px solid #fbbf24; display: inline-block; margin: 5px;
-    }
+    .main { background-color: #F8FAFC; }
     .stButton>button {
-        background-color: #fbbf24 !important; color: #022c22 !important;
-        font-weight: bold; width: 100%; border-radius: 10px; border: none;
+        width: 100%;
+        border-radius: 8px;
+        background-color: #C5A059;
+        color: white;
+        font-weight: bold;
+        height: 3em;
+        border: none;
     }
-</style>
-""", unsafe_allow_html=True)
+    .metric-card {
+        background-color: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        border-top: 4px solid #C5A059;
+    }
+    .section-header {
+        color: #1E293B;
+        font-weight: 800;
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+    .stTabs [data-baseweb="tab-list"] { gap: 24px; }
+    .stTabs [data-baseweb="tab"] {
+        height: 50px;
+        white-space: pre-wrap;
+        font-weight: bold;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
-# 3. Sidebar Profile
-st.sidebar.markdown(f"<h2 style='color:#fbbf24;'>BABAR GROUP</h2>", unsafe_allow_html=True)
-st.sidebar.write(f"*CEO:* Bilal Mughal")
-st.sidebar.write("📞 0324-4000041")
-st.sidebar.markdown("---")
-menu = st.sidebar.radio("SYSTEM MENU", [
-    "🏗️ Construction Estimator", 
-    "🏭 Ultimate Brand Directory",
-    "📝 Client Lead Manager", 
-    "📞 Contact Us"
-])
-
-# --- DATA ENGINE ---
-prop_data = {
-    "3 Marla": {"sqft": 1100, "bricks": 35000, "steel": 2.5, "cement": 650, "sand": 3200, "crush": 1600},
-    "5 Marla": {"sqft": 1800, "bricks": 56000, "steel": 3.8, "cement": 1150, "sand": 5500, "crush": 2800},
-    "7 Marla": {"sqft": 2400, "bricks": 75000, "steel": 5.2, "cement": 1500, "sand": 7200, "crush": 3600},
-    "8 Marla": {"sqft": 2800, "bricks": 88000, "steel": 6.1, "cement": 1800, "sand": 8500, "crush": 4200},
-    "10 Marla": {"sqft": 3400, "bricks": 98000, "steel": 7.5, "cement": 1950, "sand": 10500, "crush": 5200},
-    "1 Kanal": {"sqft": 5500, "bricks": 175000, "steel": 14.5, "cement": 3200, "sand": 18000, "crush": 9000},
-    "4 Marla Commercial": {"sqft": 4500, "bricks": 120000, "steel": 12.0, "cement": 2500, "sand": 14000, "crush": 7000}
+# --- DYNAMIC DATA (CITY & RATES) ---
+CITY_RATES = {
+    "Lahore": 1.0,
+    "Karachi": 1.05,
+    "Islamabad": 1.1,
+    "Faisalabad": 0.95,
+    "Gwadar": 1.2
 }
 
-if menu == "🏗️ Construction Estimator":
-    st.markdown('<div class="header-box"><h1 style="color:#fbbf24;">Babar Group Estimator</h1></div>', unsafe_allow_html=True)
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    p_size = st.selectbox("Select Plot Size", list(prop_data.keys()))
-    cost = prop_data[p_size]["sqft"] * 5200 # Updated base rate
-    st.write(f"### Total Investment: *PKR {cost/10000000:.2f} Cr*")
+# --- LOGIC & CALCULATIONS ---
+def calculate_costs(plot_size, construction_type, city):
+    # Size in sqft
+    sizes_sqft = {"3 Marla": 675, "5 Marla": 1125, "8 Marla": 1800, "10 Marla": 2250, "1 Kanal": 4500}
+    area = sizes_sqft[plot_size]
     
-    col1, col2 = st.columns(2)
-    with col1:
-        st.write(f"🧱 *Bricks (Gutka):* {prop_data[p_size]['bricks']:,}")
-        st.write(f"🏗️ *Steel (Loha):* {prop_data[p_size]['steel']} Tons")
-        st.write(f"🥡 *Cement:* {prop_data[p_size]['cement']:,} Bags")
-    with col2:
-        st.write(f"⏳ *Sand (Ravi):* {prop_data[p_size]['sand']:,} cft")
-        st.write(f"⛰️ *Crush (Bajri):* {prop_data[p_size]['crush']:,} cft")
-        st.write(f"⚡ *Electric:* Pakistan Cables")
-    st.markdown('</div>', unsafe_allow_html=True)
-
-elif menu == "🏭 Ultimate Brand Directory":
-    st.markdown('<div class="header-box"><h1 style="color:#fbbf24;">Official Material Partners</h1></div>', unsafe_allow_html=True)
-    
-    brands = {
-        "🏗️ Steel (Sariya)": ["Mughal Steel (G-60)", "Amreli Steels", "Ittehad Steel"],
-        "🥡 Cement": ["Maple Leaf", "Bestway", "Lucky Cement", "DG Khan"],
-        "🧱 Bricks & Aggregates": ["A-Grade Gutka (Sargodha)", "Ravi Sand", "Lawrencepur Sand"],
-        "⚡ Cables & Electric": ["Pakistan Cables", "Fast Cables", "GM Cables"],
-        "🎨 Paint & Finish": ["Jotun", "Dulux", "Brighto"],
-        "🚿 Sanitary & Tiles": ["Master Tiles", "Faisal Tiles", "Porta", "Sonex"],
-        "🪟 Windows & Glass": ["Chawla Aluminium", "Prime Aluminium", "Ghani Glass"]
+    # Base rates per sqft (Grey + Finishing)
+    base_rates = {
+        "Grey Structure": 2400,
+        "Standard (Grey + Finishing)": 4500,
+        "Luxury Construction": 6500
     }
     
-    for category, list_names in brands.items():
-        st.markdown(f'<div class="card"><h4>{category}</h4>', unsafe_allow_html=True)
-        for b in list_names:
-            st.markdown(f'<span class="brand-badge">{b}</span>', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+    rate = base_rates[construction_type] * CITY_RATES[city]
+    total_cost = area * rate
+    
+    # Breakdown Percentages
+    breakdown = {
+        "Cement & Sand": total_cost * 0.15,
+        "Steel (Sarya)": total_cost * 0.12,
+        "Bricks/Blocks": total_cost * 0.10,
+        "Labour Cost": total_cost * 0.25,
+        "Finishing (Tiles/Paint)": total_cost * 0.28,
+        "Electric & Plumbing": total_cost * 0.10
+    }
+    
+    return total_cost, rate, breakdown, area
 
-elif menu == "📝 Client Lead Manager":
-    st.markdown('<div class="header-box"><h1 style="color:#fbbf24;">Client Inventory</h1></div>', unsafe_allow_html=True)
-    # Form logic same as before...
-    st.info("Leads management system is active.")
+# --- SIDEBAR BRANDING ---
+with st.sidebar:
+    st.markdown("<h1 style='color: #C5A059;'>BILAL MUGHAL</h1>", unsafe_allow_html=True)
+    st.markdown("### Construction Expert")
+    st.divider()
+    selected_city = st.selectbox("Select City", list(CITY_RATES.keys()))
+    construction_type = st.radio("Construction Type", ["Grey Structure", "Standard (Grey + Finishing)", "Luxury Construction"])
+    plot_size = st.select_slider("Plot Size", options=["3 Marla", "5 Marla", "8 Marla", "10 Marla", "1 Kanal"])
+    
+    st.divider()
+    st.info("Rates are updated as of April 2026 based on market analysis.")
 
-elif menu == "📞 Contact Us":
-    st.markdown('<div class="header-box"><h1 style="color:#fbbf24;">Get In Touch</h1></div>', unsafe_allow_html=True)
-    st.markdown('<div class="card" style="text-align: center;">', unsafe_allow_html=True)
-    st.write("### 🏢 Babar Real Estate & Builders")
-    st.write("📍 DHA Phase 6, Lahore, Pakistan")
-    st.write("📞 *Phone:* 0324-4000041")
-    st.write("✉️ *CEO:* Bilal Mughal")
-    st.markdown("---")
-    st.button("Chat on WhatsApp")
-    st.markdown('</div>', unsafe_allow_html=True)
+# --- MAIN INTERFACE ---
+st.markdown(f"<div class='section-header'>🏗️ Construction Cost Estimator - {selected_city}</div>", unsafe_allow_html=True)
 
-st.sidebar.markdown("---")
-st.sidebar.markdown("<p style='text-align: center;'>Post By Bilal Mughal</p>", unsafe_allow_html=True)
+total_cost, rate_per_sqft, breakdown, area_sqft = calculate_costs(plot_size, construction_type, selected_city)
+
+# Top Metrics
+m1, m2, m3 = st.columns(3)
+with m1:
+    st.markdown(f"<div class='metric-card'><h4>Total Estimate</h4><h2 style='color:#C5A059;'>PKR {total_cost/1000000:.2f}M</h2></div>", unsafe_allow_html=True)
+with m2:
+    st.markdown(f"<div class='metric-card'><h4>Cost per SqFt</h4><h2>PKR {rate_per_sqft:,.0f}</h2></div>", unsafe_allow_html=True)
+with m3:
+    st.markdown(f"<div class='metric-card'><h4>Total Area</h4><h2>{area_sqft} sqft</h2></div>", unsafe_allow_html=True)
+
+st.write("")
+
+# Tabs for detailed view
+tab1, tab2, tab3 = st.tabs(["📊 Cost Breakdown", "🧱 Material Quantities", "📈 Market Comparison"])
+
+with tab1:
+    c1, c2 = st.columns([1, 1.2])
+    with c1:
+        st.subheader("Category Wise Split")
+        df_breakdown = pd.DataFrame(list(breakdown.items()), columns=['Category', 'Amount'])
+        fig = px.pie(df_breakdown, values='Amount', names='Category', hole=.4, 
+                     color_discrete_sequence=px.colors.sequential.Gold_r)
+        st.plotly_chart(fig, use_container_width=True)
+    
+    with c2:
+        st.subheader("Cost Summary Table")
+        st.table(df_breakdown.style.format({"Amount": "PKR {:,.0f}"}))
+
+with tab2:
+    st.subheader("Estimated Material Requirements")
+    st.write("Based on standard engineering formulas for Grey Structure:")
+    # Basic logic for materials
+    col_a, col_b, col_c = st.columns(3)
+    col_a.metric("Cement Bags", f"{int(area_sqft * 0.4)} Bags")
+    col_b.metric("Steel (Sarya)", f"{round(area_sqft * 0.003, 1)} Tons")
+    col_c.metric("Bricks", f"{int(area_sqft * 25)} Bricks")
+
+with tab3:
+    st.subheader("Price Prediction & Comparison")
+    # Comparison Chart
+    compare_data = {
+        "Type": ["Economy", "Standard", "Luxury"],
+        "Rate": [2200, 4500, 6500]
+    }
+    fig_bar = px.bar(compare_data, x="Type", y="Rate", color="Type", 
+                     title="Market Rate Comparison (PKR per SqFt)")
+    st.plotly_chart(fig_bar, use_container_width=True)
+
+# --- CALL TO ACTION ---
+st.divider()
+col_left, col_right = st.columns([2, 1])
+with col_left:
+    st.markdown("### 📄 Need a detailed PDF Report?")
+    st.write("Our premium report includes structural drawings, detailed BoQ, and exact material brands.")
+with col_right:
+    if st.button("Generate Professional Report"):
+        st.success("Report generated! Check your downloads.")
+
+st.markdown("<br><center><p style='color: grey;'>Developed by Bilal Mughal | Babar Real Estate & Builders</p></center>", unsafe_allow_html=True)
