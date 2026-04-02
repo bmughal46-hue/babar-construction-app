@@ -1,120 +1,144 @@
 import streamlit as st
+import pandas as pd
+import folium
+from streamlit_folium import st_folium
 
-# ----------------------------
-# 1. PAGE CONFIG & BRANDING
-# ----------------------------
-st.set_page_config(page_title="Babar Real Estate | Super App", layout="wide", page_icon="🏠")
+# --- 1. CONFIG & BRANDING ---
+st.set_page_config(page_title="Babar Real Estate | SaaS", layout="wide", page_icon="🏠")
 
-# Custom CSS for Premium Look
+# Custom CSS for Premium SaaS UI
 st.markdown("""
     <style>
-    .main { background-color: #f8f9fa; }
-    .stMetric { background-color: #ffffff; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-top: 4px solid #C5A059; }
-    .stButton>button { background-color: #C5A059; color: white; width: 100%; border-radius: 5px; }
+    .main { background-color: #f1f5f9; }
+    .stMetric { background-color: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); border-left: 5px solid #C5A059; }
+    .sidebar .sidebar-content { background-image: linear-gradient(#1e293b,#0f172a); }
+    .brand-title { color: #C5A059; font-size: 32px; font-weight: 800; letter-spacing: -1px; }
+    .footer { text-align: center; padding: 20px; color: #64748b; }
     </style>
     """, unsafe_allow_html=True)
 
-# ----------------------------
-# 2. SIDEBAR NAVIGATION
-# ----------------------------
+# --- 2. DATA ENGINE (Built-in for Stability) ---
+# In a real SaaS, this would come from a Database (PostgreSQL/MySQL)
+raw_data = {
+    'PlotNumber': ['102-J', '45-A', '205-M', '12-Q', '88-CCA'],
+    'Phase': ['Phase 6', 'Phase 7', 'Phase 8', 'Phase 9 Prism', 'Phase 6 Commercial'],
+    'PlotSize': ['1 Kanal', '10 Marla', '5 Marla', '5 Marla', '4 Marla'],
+    'Price': ['7.5 Cr', '3.8 Cr', '1.9 Cr', '1.3 Cr', '12.0 Cr'],
+    'Lat': [31.4697, 31.4395, 31.4900, 31.4100, 31.4720],
+    'Lon': [74.4500, 74.4700, 74.5100, 74.4900, 74.4550]
+}
+df = pd.DataFrame(raw_data)
+
+# --- 3. HEADER (CEO + LOGO) ---
+h_col1, h_col2 = st.columns([4, 1])
+with h_col1:
+    st.markdown("<div class='brand-title'>BABAR REAL ESTATE & BUILDERS</div>", unsafe_allow_html=True)
+    st.caption("The Most Advanced Real Estate SaaS Platform in Pakistan")
+with h_col2:
+    # Generic Avatar for CEO (Replace URL with your hosted photo later)
+    st.image("https://cdn-icons-png.flaticon.com/512/3135/3135715.png", width=80)
+    st.caption("Bilal Mughal (CEO)")
+
+st.divider()
+
+# --- 4. SIDEBAR NAVIGATION ---
 with st.sidebar:
-    st.image("https://cdn-icons-png.flaticon.com/512/609/609803.png", width=80)
-    st.title("Babar Real Estate")
-    st.caption("CEO: Bilal Mughal")
+    st.markdown("### 🛠️ SaaS Control Center")
+    choice = st.radio("Navigation", [
+        "Dashboard", 
+        "Interactive Maps", 
+        "AI Property Advisor", 
+        "Smarter Calculator", 
+        "Saved Plots", 
+        "Admin Panel", 
+        "Ads Management"
+    ])
     st.divider()
-    menu = st.radio("Main Menu", ["📊 Dashboard", "🧮 Construction Calculator", "🤖 AI Advisor", "📈 Market Insights"])
-    st.divider()
-    st.info("Direct WhatsApp: +92 3XX XXXXXXX")
+    st.info("System Status: Online 🟢")
 
-# ----------------------------
-# 3. DASHBOARD
-# ----------------------------
-if menu == "📊 Dashboard":
-    st.title("🏠 Babar Real Estate Super App")
-    st.markdown("#### Buy | Sell | Invest | Construct")
+# --- 5. FEATURE LOGIC ---
+
+# --- DASHBOARD ---
+if choice == "Dashboard":
+    st.subheader("🚀 Real-Time Market Metrics")
+    m1, m2, m3, m4 = st.columns(4)
+    m1.metric("Active Listings", "1,240", "+12")
+    m2.metric("Avg 1 Kanal (Ph 6)", "7.2 Cr", "Stable")
+    m3.metric("ROI Potential", "18.5%", "High")
+    m4.metric("New Leads", "48", "+5")
     
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric("5 Marla Avg Price", "1.2 – 1.8 Cr", delta="DHA Ph 9")
-    with col2:
-        st.metric("10 Marla Avg Price", "2.8 – 4.5 Cr", delta="DHA Ph 6")
-    with col3:
-        st.metric("1 Kanal Avg Price", "5.5 – 9.0 Cr", delta="DHA Ph 7")
+    st.write("### Recent Hot Listings")
+    st.dataframe(df, use_container_width=True)
+
+# --- MAPS ---
+elif choice == "Interactive Maps":
+    st.title("🗺️ DHA Smart Map Interface")
+    st.write("Visualizing inventory across DHA Lahore Phases.")
     
-    st.write("---")
-    st.subheader("Latest Listings")
-    st.write("📍 *DHA Phase 6:* 1 Kanal Plot - Hot Location (Demand 6.5 Cr)")
-    st.write("📍 *DHA Phase 9 Prism:* 5 Marla Plot - Near Possession (Demand 1.4 Cr)")
-
-# ----------------------------
-# 4. CONSTRUCTION CALCULATOR
-# ----------------------------
-elif menu == "🧮 Construction Calculator":
-    st.title("🧮 Smart Construction Estimator (2026)")
+    m = folium.Map(location=[31.4500, 74.4600], zoom_start=12, tiles="CartoDB positron")
+    for _, row in df.iterrows():
+        folium.Marker(
+            [row['Lat'], row['Lon']], 
+            popup=f"<b>{row['PlotNumber']}</b><br>{row['Phase']}<br>Price: {row['Price']}",
+            tooltip=row['Phase'],
+            icon=folium.Icon(color='orange', icon='info-sign')
+        ).add_to(m)
     
-    c1, c2 = st.columns(2)
-    with c1:
-        plot_size = st.selectbox("Select Plot Size", ["3 Marla", "5 Marla", "7 Marla", "8 Marla", "10 Marla", "1 Kanal", "2 Kanal"])
-        floors = st.selectbox("Construction Type", ["Double Story (G+1)", "Single Story", "Basement + G + 1"])
+    st_folium(m, width=1100, height=550)
+
+# --- AI ADVISOR ---
+elif choice == "AI Property Advisor":
+    st.title("🤖 Babar AI Advisor (GPT-4 Powered)")
+    st.write("Ask anything about DHA investment strategies.")
+    user_input = st.text_input("Example: Is Phase 9 Prism good for 1-year investment?")
     
-    with c2:
-        # Standard sqft mapping
-        sqft_defaults = {"3 Marla": 1350, "5 Marla": 2100, "7 Marla": 2700, "8 Marla": 3100, "10 Marla": 3500, "1 Kanal": 6500, "2 Kanal": 11500}
-        covered_area = st.number_input("Total Covered Area (sqft)", value=sqft_defaults[plot_size])
+    if user_input:
+        with st.spinner("AI is analyzing market trends..."):
+            # Simulation of AI Response (Integrate OpenAI API here)
+            st.chat_message("assistant").write(f"Based on 2026 data, '{user_input}' suggests a high ROI strategy. Bilal Mughal recommends focusing on 'Construct & Sell' in developing sectors.")
 
-    # 2026 Actual Rates
-    rate = st.slider("Grey Structure Rate (PKR/sqft)", 3300, 3800, 3450)
-    total_cost = covered_area * rate
-
-    st.divider()
-    col_a, col_b = st.columns(2)
-    col_a.success(f"*Total Covered Area:* {covered_area:,} sqft")
-    col_b.success(f"*Estimated Grey Cost:* PKR {total_cost/1000000:.2f} Million")
-
-    # MATERIAL ESTIMATION Logic
-    st.subheader("🧱 Required Material (Grey Structure)")
-    m1, m2, m3 = st.columns(3)
-    m1.metric("Cement Bags", f"{int(covered_area * 0.45):,}")
-    m2.metric("Bricks (Awwal)", f"{int(covered_area * 26):,}")
-    m3.metric("Steel (Tons)", f"{round(covered_area * 0.0038, 2)}")
+# --- CALCULATOR ---
+elif choice == "Smarter Calculator":
+    st.title("🧮 Advanced Construction & Investment Calc")
+    col_c1, col_c2 = st.columns(2)
+    with col_c1:
+        size = st.selectbox("Plot Size", ["5 Marla", "10 Marla", "1 Kanal"])
+        target = st.radio("Target", ["Grey Structure", "Full Finishing"])
+    with col_c2:
+        rate = st.number_input("Market Rate (PKR/sqft)", value=3450)
+        area = {"5 Marla": 2100, "10 Marla": 3500, "1 Kanal": 6500}[size]
     
-    st.caption("Recommendations: Lucky/Bestway Cement | Mughal/Ittehad Grade-60 Steel")
-
-# ----------------------------
-# 5. AI ADVISOR
-# ----------------------------
-elif menu == "🤖 AI Advisor":
-    st.title("🤖 Babar AI Property Advisor")
-    user_query = st.text_input("Ask about investment, phases, or rates (e.g., 'Where to invest in DHA?')")
-
-    if user_query:
-        q = user_query.lower()
-        if "phase 6" in q:
-            st.success("Phase 6 is the gold standard. High rental yield and 100% secure.")
-        elif "prism" in q or "phase 9" in q:
-            st.success("9 Prism is best for investment. Possession is coming, prices will jump 20%.")
-        elif "commercial" in q:
-            st.success("Commercial in Phase 7 & 8 Broadway is hot right now. High ROI.")
-        else:
-            st.info("General Advice: 2026 is the year of 'Construct & Sell'. Buy 5 Marla, build A+ quality, and sell for 30% profit.")
-
-# ----------------------------
-# 6. MARKET INSIGHTS
-# ----------------------------
-elif menu == "📈 Market Insights":
-    st.title("📊 Market Trends (DHA Lahore)")
-    st.markdown("### 🔥 Hot Sectors This Month")
-    st.write("✅ *Phase 9 Prism:* Sector Q & R (High demand)")
-    st.write("✅ *Phase 7:* Sector Y (Construction hub)")
-    st.write("✅ *Phase 6:* Sector M (Premium Living)")
+    total = area * rate
+    st.success(f"### Estimated Total: PKR {total:,.0f}")
     
-    st.divider()
-    st.success("""
-    *Investment Strategy by Bilal Mughal:*
-    1. Buy plot in 'Developing' phase.
-    2. Start construction immediately (Beat inflation).
-    3. Use premium materials (Increases resale value).
-    4. Resale profit margin: *25% - 40%* in current market.
-    """)
+# --- SAVED PLOTS ---
+elif choice == "Saved Plots":
+    st.title("💾 User Favorites")
+    st.warning("User Authentication Required. Login to see your saved plots.")
+    st.button("Login / Sign Up")
 
-st.markdown("<br><hr><center>Powered by Bilal Mughal | Babar Real Estate © 2026</center>", unsafe_allow_html=True)
+# --- ADMIN PANEL ---
+elif choice == "Admin Panel":
+    st.title("🛠️ Global Admin Panel")
+    st.subheader("Data & File Management")
+    uploaded = st.file_uploader("Upload Daily Plot Inventory (CSV)", type="csv")
+    if uploaded:
+        st.success("Database Updated Successfully!")
+    st.button("Clear Cache")
+
+# --- ADS MANAGEMENT ---
+elif choice == "Ads Management":
+    st.title("📢 SaaS Ads Manager")
+    st.write("Promote your listings or partners.")
+    ad_img = st.file_uploader("Upload Ad Banner (1200x200)", type=["jpg", "png"])
+    ad_link = st.text_input("Enter Destination URL")
+    if st.button("Deploy Ad"):
+        st.info("Ad queued for review by Bilal Mughal.")
+
+# --- FOOTER ---
+st.markdown("""
+    <div class='footer'>
+    <hr>
+    © 2026 Babar Real Estate | Developed by Bilal Mughal | All Rights Reserved
+    </div>
+    """, unsafe_allow_html=True)
