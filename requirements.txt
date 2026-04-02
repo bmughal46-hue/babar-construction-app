@@ -1,6 +1,7 @@
 streamlit
 pandas
-openai
-Pillow
 folium
 streamlit-folium
+Pillow
+openai
+fpdf
