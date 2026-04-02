@@ -146,9 +146,3 @@ elif choice == "Ads Management":
             st.success("Ad uploaded successfully!")
         else:
             st.warning("Select image and enter link.")
-git add requirements.txt
-git commit -m "Add requirements for Streamlit Cloud"
-git push origin main
-git add requirements.txt
-git commit -m "Add requirements for Streamlit Cloud"
-git push origin main
