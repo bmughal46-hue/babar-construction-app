@@ -1,68 +1,148 @@
+# =============================
+# Babar Real Estate | End-Level SaaS
+# Features: Dashboard, Maps, AI Advisor, Calculator, Admin Panel, Ads
+# =============================
+
 import streamlit as st
+import pandas as pd
+import folium
+from streamlit_folium import st_folium
+from PIL import Image
+import openai
 
-# --- 1. CONFIG ---
-st.set_page_config(page_title="Babar Real Estate", layout="wide")
+# -----------------------------
+# CONFIG / API KEYS PLACEHOLDER
+# -----------------------------
+OPENAI_API_KEY = "YOUR_OPENAI_API_KEY"  # Add your OpenAI GPT API key here
+GOOGLE_MAPS_API_KEY = "YOUR_GOOGLE_MAPS_API_KEY"  # Add your Google Maps API key here
 
-# Session States
-if 'logged_in' not in st.session_state:
-    st.session_state.logged_in = False
+openai.api_key = OPENAI_API_KEY
 
-# --- 2. PREMIUM UI ---
-st.markdown("""
-    <style>
-    .stApp { max-width: 500px; margin: 0 auto; background: white; border: 1px solid #ddd; }
-    .welcome-banner { background: #e8f5e9; color: #2e7d32; padding: 15px; border-radius: 10px; text-align: center; font-weight: bold; margin-bottom: 20px; border: 1px solid #a5d6a7; }
-    .header-style { background: #003366; color: white; padding: 20px; text-align: center; border-radius: 0 0 15px 15px; }
-    .whatsapp-footer { position: fixed; bottom: 0; width: 100%; max-width: 500px; background: #25D366; color: white; text-align: center; padding: 10px; font-weight: bold; z-index: 100; }
-    </style>
-    """, unsafe_allow_html=True)
+# -----------------------------
+# LOAD ASSETS
+# -----------------------------
+logo = Image.open("assets/logo.png")  # Babar Real Estate Logo
+ceo = Image.open("assets/ceo.png")    # CEO Babar Mughal image
 
-# --- HEADER ---
-st.markdown("<div class='header-style'><h2>BABAR REAL ESTATE</h2><p style='font-size:12px;'>DHA Phase 8 Broadway, Lahore</p></div>", unsafe_allow_html=True)
+# -----------------------------
+# APP CONFIG
+# -----------------------------
+st.set_page_config(page_title="Babar Real Estate | SaaS", layout="wide", page_icon="🏠")
 
-# --- TABS ---
-tab1, tab2, tab3, tab4 = st.tabs(["🏡 Home", "🤖 AI", "🧮 Calc", "⚙️ Admin"])
+# -----------------------------
+# HEADER
+# -----------------------------
+col1, col2 = st.columns([3,1])
+with col1:
+    st.image(logo, width=200)
+with col2:
+    st.image(ceo, width=80)
+st.markdown("<hr>", unsafe_allow_html=True)
 
-# --- ADMIN TAB (Yahan Welcome Message aayega) ---
-with tab4:
-    if not st.session_state.logged_in:
-        st.subheader("Admin Login")
-        u = st.text_input("User ID")
-        p = st.text_input("Password", type="password")
-        if st.button("Login"):
-            if u == "admin" and p == "babar123":
-                st.session_state.logged_in = True
-                st.rerun()
-            else:
-                st.error("Invalid Login")
-    else:
-        # --- YE RAHI AAPKI REQUESTED TABDEELI ---
-        st.markdown("<div class='welcome-banner'>🌟 Welcome to Babar Mughal (CEO)</div>", unsafe_allow_html=True)
-        st.success("Admin Access Granted. You can now manage all listings.")
-        
-        with st.form("post_ad"):
-            st.write("📢 *Post New Property Ad*")
-            price = st.text_input("Price (e.g. 3.30 Crore)")
-            loc = st.text_input("Location")
-            if st.form_submit_button("Publish Now"):
-                st.info(f"Ad for {loc} has been queued for publishing.")
-        
-        if st.button("Secure Logout"):
-            st.session_state.logged_in = False
-            st.rerun()
+# -----------------------------
+# SIDEBAR NAVIGATION
+# -----------------------------
+st.sidebar.title("Navigation")
+pages = [
+    "Dashboard",
+    "Maps",
+    "AI Advisor",
+    "Calculator",
+    "Saved Plots",
+    "Admin Panel",
+    "Ads Management"
+]
+choice = st.sidebar.radio("Go to", pages)
 
-# --- OTHER TABS (Sari App) ---
-with tab1:
-    st.write("### Featured Listings")
-    st.info("Listings will appear here once published from Admin.")
+# -----------------------------
+# LOAD SAMPLE DHA DATA
+# -----------------------------
+df = pd.read_csv("data/dha_sample.csv")  # Columns: PlotNumber,Phase,PlotSize,Price,Type,Latitude,Longitude
 
-with tab2:
-    st.write("### AI Property Advisor")
-    st.caption("Ask Bilal Mughal's AI anything about DHA market.")
+# -----------------------------
+# DASHBOARD PAGE
+# -----------------------------
+if choice == "Dashboard":
+    st.title("🏡 Babar Real Estate Dashboard")
+    st.subheader("Latest DHA Listings")
+    st.dataframe(df.head(10))
 
-with tab3:
-    st.write("### Construction Bill Generator")
-    st.caption("Generate official estimates for your clients.")
+    st.subheader("Metrics by Plot Size")
+    plot_sizes = df['PlotSize'].unique()
+    for size in plot_sizes:
+        count = df[df['PlotSize']==size].shape[0]
+        st.metric(label=f"{size} plots", value=count)
 
-# --- FOOTER ---
-st.markdown("<div class='whatsapp-footer'>WhatsApp: Babar Mughal (+92 324 4000041)</div>", unsafe_allow_html=True)
+# -----------------------------
+# MAPS PAGE
+# -----------------------------
+elif choice == "Maps":
+    st.title("🗺️ DHA Interactive Map")
+    m = folium.Map(location=[31.5204, 74.3587], zoom_start=12)
+    for _, row in df.iterrows():
+        folium.Marker([row['Latitude'], row['Longitude']],
+                      popup=f"{row['Phase']} - {row['PlotSize']} - {row['Price']}").add_to(m)
+    st_folium(m, width=700, height=500)
+
+# -----------------------------
+# AI ADVISOR PAGE
+# -----------------------------
+elif choice == "AI Advisor":
+    st.title("🤖 AI Property Advisor")
+    query = st.text_input("Ask about DHA plots, investment, ROI:")
+    if query:
+        with st.spinner("Getting advice..."):
+            response = openai.ChatCompletion.create(
+                model="gpt-4",
+                messages=[{"role":"user","content":query}]
+            )
+            answer = response['choices'][0]['message']['content']
+            st.success(answer)
+
+# -----------------------------
+# CALCULATOR PAGE
+# -----------------------------
+elif choice == "Calculator":
+    st.title("🧮 Construction & Investment Calculator")
+    plot_size = st.selectbox("Select Plot Size", df['PlotSize'].unique())
+    rate_per_marla = st.number_input("Rate per Marla (PKR)", value=1000000)
+    if st.button("Calculate Total Price"):
+        size_num = int(plot_size.split()[0])
+        price = rate_per_marla * size_num
+        st.success(f"Approximate Price for {plot_size}: PKR {price:,}")
+        st.download_button("Download PDF",
+                           f"Plot Size: {plot_size}\nPrice: {price}",
+                           file_name="construction_calculation.txt")
+
+# -----------------------------
+# SAVED PLOTS PAGE
+# -----------------------------
+elif choice == "Saved Plots":
+    st.title("💾 Your Saved Plots")
+    st.info("User login system placeholder - Add DB integration to save plots.")
+
+# -----------------------------
+# ADMIN PANEL PAGE
+# -----------------------------
+elif choice == "Admin Panel":
+    st.title("🛠️ Admin Panel")
+    st.subheader("Manage DHA Files")
+    uploaded_file = st.file_uploader("Upload DHA CSV File", type=["csv"])
+    if uploaded_file:
+        new_df = pd.read_csv(uploaded_file)
+        st.success("File uploaded successfully!")
+        st.dataframe(new_df.head())
+
+# -----------------------------
+# ADS MANAGEMENT PAGE
+# -----------------------------
+elif choice == "Ads Management":
+    st.title("📢 Ads Management")
+    st.subheader("Upload Ads Image")
+    ad_file = st.file_uploader("Select Ad Image", type=["png","jpg","jpeg"])
+    ad_link = st.text_input("Ad Link (URL)")
+    if st.button("Upload Ad"):
+        if ad_file and ad_link:
+            st.success("Ad uploaded successfully!")
+        else:
+            st.warning("Select image and enter link.")
