@@ -153,3 +153,4 @@ with tabs[4]:
 # FOOTER
 # -----------------------------
 st.markdown(f"<div class='footer'>WhatsApp: <a href='https://wa.me/923244000041' style='color:white;'>Babar Mughal (+92 324 4000041)</a></div>", unsafe_allow_html=True)
+streamlit run app.py
