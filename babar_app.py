@@ -149,3 +149,6 @@ elif choice == "Ads Management":
 git add requirements.txt
 git commit -m "Add requirements for Streamlit Cloud"
 git push origin main
+git add requirements.txt
+git commit -m "Add requirements for Streamlit Cloud"
+git push origin main
