@@ -1,66 +1,80 @@
 import streamlit as st
-import pandas as pd
 
-# --- 1. CORE SETUP (Syntax Fix) ---
-st.set_page_config(page_title="Babar Real Estate", layout="wide")
+# --- 1. SETTINGS & SYNTAX FIX ---
+st.set_page_config(page_title="Babar Real Estate | Zameen Edition", layout="wide")
 
-# --- 2. THEME & BEAUTY (DHA PLUS STYLE) ---
+# --- 2. ZAMEEN.COM STYLE CSS ---
 st.markdown("""
     <style>
-    .main { background-color: #f0f2f5; }
-    .stApp { max-width: 500px; margin: 0 auto; border: 1px solid #ddd; background: white; }
-    .card { background: white; padding: 15px; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-top: 4px solid #C5A059; }
-    .price { color: #856404; background: #fff3cd; padding: 3px 8px; border-radius: 4px; font-weight: bold; }
+    .main { background-color: #f5f7f9; }
+    .stApp { max-width: 550px; margin: 0 auto; background: white; border: 1px solid #e1e4e7; }
+    .property-card {
+        background: white; border-radius: 12px; padding: 16px; margin-bottom: 20px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-left: 6px solid #28a745;
+    }
+    .price-tag { color: #28a745; font-size: 22px; font-weight: 800; margin-bottom: 5px; }
+    .loc-text { color: #666; font-size: 14px; margin-bottom: 10px; }
+    .badge { background: #e8f5e9; color: #2e7d32; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+    .contact-btn { width: 100%; background: #28a745; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 3. DATABASE (SESSION) ---
-if 'db' not in st.session_state:
-    st.session_state.db = [
-        {"price": "330 Lakh", "phase": "Phase 9 Prism", "size": "1 Kanal", "plot": "Sector A"},
-        {"price": "425 Lakh", "phase": "Phase 7", "size": "1 Kanal", "plot": "Sector Y"}
+# --- 3. DYNAMIC INVENTORY ---
+if 'ads' not in st.session_state:
+    st.session_state.ads = [
+        {"price": "3.40 Crore", "loc": "Phase 9 Prism, Sector C", "size": "1 Kanal", "type": "Residential"},
+        {"price": "1.85 Crore", "loc": "Phase 7, Sector Z", "size": "10 Marla", "type": "Residential"}
     ]
 
-# --- 4. NAVIGATION TABS (ALL 4 FEATURES) ---
-tab1, tab2, tab3, tab4 = st.tabs(["🏠 Home/Ads", "🤖 AI Advisor", "🧮 Calculator", "⚙️ Admin"])
+# --- 4. NAVIGATION (DHA PLUS STYLE) ---
+st.markdown("<h2 style='color:#003366; text-align:center;'>BABAR <span style='color:#28a745;'>GROUP</span></h2>", unsafe_allow_html=True)
+st.markdown("<p style='text-align:center; font-size:12px;'>Elite SaaS Portal by Bilal Mughal</p>", unsafe_allow_html=True)
 
-# --- FEATURE 1: ADS MANAGEMENT (HOME) ---
-with tab1:
-    st.markdown("### Hot <span style='color:red'>Classified</span> 🔥", unsafe_allow_html=True)
-    for item in st.session_state.db:
+tabs = st.tabs(["🏠 Buy", "🤖 AI Advisor", "🧮 Construction", "⚙️ Admin"])
+
+# --- TAB 1: ZAMEEN STYLE LISTINGS ---
+with tabs[0]:
+    st.markdown("### Featured Properties 🔥")
+    for ad in st.session_state.ads:
         st.markdown(f"""
-        <div class="card">
-            <span class="price">{item['price']}</span>
-            <p style='margin:10px 0;'><b>{item['size']} - {item['phase']}</b><br>
-            <span style='font-size:12px; color:#666;'>{item['plot']}</span></p>
-            <button style='width:100%; border:none; background:#007bff; color:white; border-radius:5px;'>Contact Bilal Mughal</button>
+        <div class="property-card">
+            <div class="price-tag">PKR {ad['price']}</div>
+            <div class="loc-text">📍 {ad['loc']}</div>
+            <div style="margin-bottom:15px;">
+                <span class="badge">{ad['size']}</span>
+                <span class="badge">{ad['type']}</span>
+                <span class="badge">Verified</span>
+            </div>
+            <button class="contact-btn">WhatsApp Bilal Mughal</button>
         </div>
         """, unsafe_allow_html=True)
 
-# --- FEATURE 2: AI PROPERTY ADVISOR ---
-with tab2:
-    st.subheader("🤖 Babar AI Agent")
-    q = st.text_input("Ask about DHA investment:")
-    if q:
-        st.info(f"Analyzing '{q}'... Bilal Mughal recommends Phase 9 Prism for long term ROI in 2026.")
+# --- TAB 2: AI AGENT ---
+with tabs[1]:
+    st.markdown("### 🤖 Babar AI Advisor")
+    query = st.text_input("Investement ke bare mein pochein:")
+    if query:
+        st.info(f"Market Analysis: Based on Zameen trends, {query} suggests a high ROI in DHA Lahore Phase 6.")
 
-# --- FEATURE 3: CONSTRUCTION CALCULATOR ---
-with tab3:
-    st.subheader("🧮 2026 Construction Calc")
-    s = st.selectbox("Plot Size", ["5 Marla", "10 Marla", "1 Kanal"])
-    rate = 3450 # Verified 2026 Rate
-    area = {"5 Marla": 2100, "10 Marla": 3500, "1 Kanal": 6500}[s]
-    st.metric("Estimated Cost", f"PKR {(area*rate)/1000000:.2f}M")
+# --- TAB 3: CONSTRUCTION CALCULATOR ---
+with tabs[2]:
+    st.markdown("### 🧮 Elite Estimator 2026")
+    p_size = st.selectbox("Plot Size", ["5 Marla", "10 Marla", "1 Kanal"])
+    rate = 3450 # Current Lahore Rate
+    area = {"5 Marla": 2100, "10 Marla": 3500, "1 Kanal": 6500}[p_size]
+    total = (area * rate) / 1000000
+    st.metric("Total Investment", f"PKR {total:.2f} Million")
+    st.caption("Rate: 3,450/sqft (Grey Structure)")
 
-# --- FEATURE 4: ADMIN PANEL ---
-with tab4:
-    st.subheader("⚙️ Admin Dashboard")
-    with st.form("add_plot"):
-        p = st.text_input("Price (Lakh)")
-        ph = st.text_input("Phase")
-        sz = st.text_input("Size")
-        if st.form_submit_button("Post Live Ad"):
-            st.session_state.db.insert(0, {"price": p+" Lakh", "phase": ph, "size": sz, "plot": "New Listing"})
-            st.success("Ad is now Live on Home!")
+# --- TAB 4: ADMIN PANEL (ADS MANAGEMENT) ---
+with tabs[3]:
+    st.markdown("### ⚙️ Inventory Control")
+    with st.form("admin_form"):
+        p = st.text_input("Price (e.g. 2.10 Crore)")
+        l = st.text_input("Full Location")
+        s = st.selectbox("Size", ["5 Marla", "10 Marla", "1 Kanal"])
+        if st.form_submit_button("Post Ad Globally"):
+            st.session_state.ads.insert(0, {"price": p, "loc": l, "size": s, "type": "Residential"})
+            st.success("Ad Live ho chuki hai!")
 
-st.markdown("<br><center><p style='color:#999; font-size:10px;'>Babar Group SaaS v15.0</p></center>", unsafe_allow_html=True)
+st.markdown("<br><center><p style='color:#999; font-size:10px;'>Babar Real Estate v17.0 | April 2026</p></center>", unsafe_allow_html=True)
