@@ -1,4 +1,4 @@
-import streamlit as st
+[11:46 PM, 4/2/2026] Bilal Mughal: import streamlit as st
 import pandas as pd
 import plotly.express as px
 
@@ -21,74 +21,78 @@ st.markdown("""
 def get_final_estimate(category, size, finish):
     sqft_map = {
         "3 Marla": 675, "4 Marla": 900, "5 Marla": 1125, "7 Marla": 1575, 
-        "8 Marla": 1800, "10 Marla": 2250, "1 Kanal": 4500, "2 Kanal": 9000,
-        "4 Marla Comm": 900, "8 Marla Comm": 1800
+        "8 Marla": 1800, "10 Marla": 2250, "1 Kanal…
+[11:49 PM, 4/2/2026] Bilal Mughal: import streamlit as st
+
+# --- 1. CONFIG ---
+st.set_page_config(page_title="Babar Group | Master Estimator", layout="wide")
+
+# --- 2. LOGIC ENGINE (2026 DATA) ---
+def calculate_babar_estimate(cat, size, finish):
+    # Accurate Area Mapping (Double Story Covered Area)
+    # 5 Marla = ~2100 sqft, 10 Marla = ~3400 sqft
+    sqft_map = {
+        "3 Marla": 1215, "4 Marla": 1620, "5 Marla": 2025, "7 Marla": 2678, 
+        "8 Marla": 3060, "10 Marla": 3375, "1 Kanal": 6300, "2 Kanal": 11000,
+        "4 Marla Comm": 2400, "8 Marla Comm": 4500 # Multi-story assumptions
     }
     area = sqft_map[size]
     
-    if category == "Residential":
-        rates = {"Grey Structure": 2150, "Standard": 4100, "Luxury": 6000}
-    else:
-        rates = {"Grey Structure": 2700, "Standard": 5200, "Luxury": 7500}
+    # LATEST RATES (APRIL 2026)
+    if cat == "Residential":
+        # Grey: 3300, Standard: 6200, Luxury: 8800
+        rates = {"Grey Structure": 3300, "Standard": 6200, "Luxury": 8800}
+    else: # Commercial
+        rates = {"Grey Structure": 4200, "Standard": 8500, "Luxury": 12000}
         
     rate = rates[finish]
     total = area * rate
     
+    # QUANTITIES (Verified by Glorious Builders 2026 Standards)
+    # Cement: ~0.45 bags/sqft | Steel: ~3.8kg/sqft | Bricks: ~25/sqft
     materials = {
-        "Cement": {"qty": int(area * 0.40), "unit": "Bags", "info": "Lucky/Bestway (OPC)"},
-        "Steel (Sarya)": {"qty": round((area * 3.6) / 1000, 2), "unit": "Tons", "info": "Grade-60 (Mughal/Ittehad)"},
-        "Bricks": {"qty": int(area * 22), "unit": "Pcs", "info": "Awwal (Handmade/Machine)"},
-        "Sand (Ravi)": {"qty": int(area * 3.0), "unit": "cft", "info": "Screened Ravi Sand"},
-        "Crush (Bajri)": {"qty": int(area * 1.5), "unit": "cft", "info": "Margalla/Sargodha Mix"},
-        "Cables": {"qty": "Full", "unit": "Wiring", "info": "Pakistan Cables (99% Copper)"}
+        "Cement": {"qty": int(area * 0.45), "unit": "Bags", "rate": 1450},
+        "Steel (Sarya)": {"qty": round((area * 3.8)/1000, 2), "unit": "Tons", "rate": 275000},
+        "Bricks": {"qty": int(area * 25), "unit": "Pcs", "rate": 25},
+        "Sand (Ravi)": {"qty": int(area * 3.5), "unit": "cft", "rate": 65},
+        "Crush (Sargodha)": {"qty": int(area * 1.6), "unit": "cft", "rate": 135}
     }
     
     return total, area, rate, materials
 
-# --- 4. SIDEBAR ---
+# --- 3. UI ---
+st.title("🏗️ Babar Group | Professional Construction Calculator")
+st.markdown("### Powered by Bilal Mughal - April 2026 Market Rates")
+
 with st.sidebar:
-    st.markdown("<h1 class='brand-gold'>BILAL MUGHAL</h1>", unsafe_allow_html=True)
-    st.caption("CEO - Babar Real Estate & Builders")
-    st.divider()
+    st.header("Project Setup")
     cat = st.radio("Category", ["Residential", "Commercial"])
+    
     if cat == "Residential":
         options = ["3 Marla", "4 Marla", "5 Marla", "7 Marla", "8 Marla", "10 Marla", "1 Kanal", "2 Kanal"]
     else:
         options = ["4 Marla Comm", "8 Marla Comm"]
-    selected_size = st.selectbox("Plot Size", options)
-    selected_finish = st.radio("Finish Type", ["Grey Structure", "Standard", "Luxury"])
+        
+    p_size = st.selectbox("Select Plot Size", options)
+    p_finish = st.radio("Construction Mode", ["Grey Structure", "Standard", "Luxury"])
 
-# --- 5. MAIN UI ---
-st.title("🏗️ Babar Group Master Estimator")
-total_val, total_sqft, per_sqft, mat_list = get_final_estimate(cat, selected_size, selected_finish)
+total, area, rate_sqft, mats = calculate_babar_estimate(cat, p_size, p_finish)
 
+# Main Stats
 c1, c2, c3 = st.columns(3)
-with c1:
-    st.markdown(f"<div class='metric-card'><h4>Total Estimate</h4><h2 class='brand-gold'>PKR {total_val/1000000:.2f}M</h2></div>", unsafe_allow_html=True)
-with c2:
-    st.markdown(f"<div class='metric-card'><h4>Rate / SqFt</h4><h2>PKR {per_sqft:,}</h2></div>", unsafe_allow_html=True)
-with c3:
-    st.markdown(f"<div class='metric-card'><h4>Covered Area</h4><h2>{total_sqft} sqft</h2></div>", unsafe_allow_html=True)
+c1.metric("Total Estimated Cost", f"PKR {total/1000000:.2f}M")
+c2.metric("Market Rate / SqFt", f"PKR {rate_sqft:,}")
+c3.metric("Total Covered Area", f"{area:,} sqft")
 
-t1, t2 = st.tabs(["📋 Detailed Materials", "✅ Brand Awareness"])
+st.divider()
 
-with t1:
-    st.subheader(f"Material Breakdown: {selected_size}")
-    m_cols = st.columns(3)
-    for i, (item, info) in enumerate(mat_list.items()):
-        with m_cols[i % 3]:
-            st.write(f"*{item}*")
-            st.subheader(f"{info['qty']} {info['unit']}")
-            st.caption(f"Recommendation: {info['info']}")
+# Material Breakdown
+st.subheader("🛠️ Material & Quantity Requirements")
+m_cols = st.columns(len(mats))
+for i, (item, data) in enumerate(mats.items()):
+    with m_cols[i]:
+        st.write(f"*{item}*")
+        st.subheader(f"{data['qty']} {data['unit']}")
+        st.caption(f"Estimated Market Price: {data['rate']}")
 
-with t2:
-    st.subheader("Babar Group Quality Standards")
-    st.info("Hum sirf behtareen material recommend karte hain:")
-    st.markdown("""
-    1. *Cement:* DG ya Lucky Cement slab ki mazbooti ke liye behtareen hai.
-    2. *Steel:* Grade-60 sarya hi istemal karein (Mughal Supreme recommended).
-    3. *Electric:* Sasti wiring se gurez karein, sirf Pakistan Cables use karein.
-    4. *Bajri:* Margalla ki bajri grey structure ke liye sab se behtar hai.
-    """)
-
-st.markdown("<br><hr><center>Babar Real Estate | Powered by Bilal Mughal © 2026</center>", unsafe_allow_html=True)
+st.info("Note: These estimates include Labor Cost (Avg PKR 500-600/sqft) and premium materials.")
