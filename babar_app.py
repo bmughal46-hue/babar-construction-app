@@ -1,96 +1,155 @@
+# app.py
 import streamlit as st
 import pandas as pd
 import folium
 from streamlit_folium import st_folium
-import os
+from PIL import Image
+import openai
+from fpdf import FPDF
+import urllib.parse
 
-# --- 1. CONFIG & THEME ---
-st.set_page_config(page_title="Babar Real Estate | Zameen Portal", layout="wide")
+# -----------------------------
+# CONFIG & API KEY
+# -----------------------------
+st.set_page_config(page_title="Babar Real Estate | CEO Babar Mughal", layout="wide")
+openai.api_key = st.secrets.get("OPENAI_API_KEY", "")
 
-# Safe CSS (No Decimals Error)
+# -----------------------------
+# ASSETS
+# -----------------------------
+logo = Image.open("assets/logo.png")  # Add your logo.png in assets folder
+ceo = Image.open("assets/ceo.png")    # Add your CEO image
+
+# -----------------------------
+# CSS
+# -----------------------------
 st.markdown("""
 <style>
-    .stApp { background-color: #f0f2f5; }
-    .main-header { background-color: #003366; color: white; padding: 30px; text-align: center; border-radius: 0px 0px 30px 30px; margin-bottom: 25px; border-bottom: 5px solid #c5a059; }
-    .zameen-card { background: white; padding: 15px; border-radius: 10px; border-left: 5px solid #28a745; margin-bottom: 15px; box-shadow: 2px 2px 10px #ccc; }
-    .wa-footer { background: #25D366; color: white; padding: 10px; text-align: center; position: fixed; bottom: 0; width: 100%; font-weight: bold; z-index: 100; }
+.header { background-color:#003366; color:white; padding:20px; border-radius:0 0 20px 20px; text-align:center; }
+.footer { background-color:#003366; color:white; padding:12px; text-align:center; position:fixed; bottom:0; width:100%; }
+.metric-box { background-color:#f8f9fa; border-radius:10px; padding:10px; text-align:center; margin:5px; }
+.listing { border-left:4px solid gold; padding:8px; margin:5px; background:#fff; border-radius:5px; }
 </style>
 """, unsafe_allow_html=True)
 
-# --- 2. HEADER ---
-st.markdown("<div class='main-header'><h1>BABAR REAL ESTATE</h1><p>Pakistan's Premium Property Portal | DHA Phase 8 Lahore</p></div>", unsafe_allow_html=True)
+# -----------------------------
+# HEADER
+# -----------------------------
+st.image(logo, width=200)
+st.markdown("<div class='header'><h2>BABAR REAL ESTATE</h2><p>C-116, Broadway Plaza, DHA Phase 8, Lahore</p></div>", unsafe_allow_html=True)
 
-# --- 3. DATA ENGINE ---
-@st.cache_data
-def get_babar_data():
-    if os.path.exists("data/dha_sample.csv"):
-        return pd.read_csv("data/dha_sample.csv")
-    else:
-        return pd.DataFrame({
-            'Phase': ['Phase 8', 'Phase 9 Prism', 'Phase 6'],
-            'Block': ['Broadway', 'Sector A', 'Block L'],
-            'Size': ['1 Kanal', '1 Kanal', '10 Marla'],
-            'Price': [75000000, 33500000, 45000000],
-            'Lat': [31.4697, 31.4450, 31.4880],
-            'Lon': [74.4534, 74.4800, 74.4440]
-        })
+# -----------------------------
+# TABS
+# -----------------------------
+tabs = st.tabs(["🏡 Dashboard","📍 Maps","🤖 AI Advisor","🧮 Calculator","⚙️ Admin"])
 
-df = get_babar_data()
+# -----------------------------
+# SAMPLE DHA DATA
+# -----------------------------
+data = [
+    {"Phase":"Phase 9","Block":"Prism","PlotNumber":1,"PlotSize":"1 Kanal","Price":33000000,"Type":"Residential","Latitude":31.4697,"Longitude":74.4534,"NearbySchools":"School A","NearbyParks":"Park A","NearbyMarkets":"Market A","Masjid":"Masjid A"},
+    {"Phase":"Phase 7","Block":"Sector Z","PlotNumber":2,"PlotSize":"10 Marla","Price":18500000,"Type":"Residential","Latitude":31.4720,"Longitude":74.4550,"NearbySchools":"School B","NearbyParks":"Park B","NearbyMarkets":"Market B","Masjid":"Masjid B"}
+]
+df = pd.DataFrame(data)
 
-# --- 4. TABS (THE CORE FUNCTIONS) ---
-tabs = st.tabs(["🏡 Home", "📍 Map Search", "🤖 AI Advisor", "🧮 Calculator", "⚙️ Admin"])
-
-# HOME / LISTINGS
+# -----------------------------
+# DASHBOARD
+# -----------------------------
 with tabs[0]:
-    st.subheader("Featured Properties 🏠")
-    col_a, col_b = st.columns(2)
-    col_a.metric("Total Listings", "1,240", "New")
-    col_b.metric("ROI Potential", "18.5%", "High")
+    st.subheader("Real-Time Market Metrics 🚀")
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Active Listings", len(df))
+    col2.metric("ROI Potential", "18.5%")
+    col3.metric("Hot Phase", "Phase 9 Prism")
     
-    for i, row in df.iterrows():
-        st.markdown(f"""
-        <div class='zameen-card'>
-            <h4 style='margin:0; color:#003366;'>PKR {row['Price']:,}</h4>
-            <p style='margin:0;'><b>{row['Phase']} - {row['Block']}</b> | {row['Size']}</p>
-            <small>Verified by Babar Real Estate</small>
-        </div>
-        """, unsafe_allow_html=True)
-
-# MAP SEARCH
-with tabs[1]:
-    st.subheader("📍 DHA Plot Locator")
-    m = folium.Map(location=[31.4697, 74.4534], zoom_start=12)
+    st.markdown("---")
+    st.write("### Recent Hot Listings 🔥")
     for _, row in df.iterrows():
-        folium.Marker([row['Lat'], row['Lon']], popup=f"{row['Phase']} - {row['Price']}").add_to(m)
-    st_folium(m, width="100%", height=500)
+        st.markdown(f"<div class='listing'>{row['Phase']} {row['Block']} | {row['PlotSize']} | PKR {row['Price']:,}</div>", unsafe_allow_html=True)
 
+# -----------------------------
+# MAPS
+# -----------------------------
+with tabs[1]:
+    st.subheader("🗺️ Interactive DHA Map")
+    m = folium.Map(location=[31.5204, 74.3587], zoom_start=12)
+    for _, row in df.iterrows():
+        popup_text = f"{row['Phase']} {row['Block']} | {row['PlotSize']} | PKR {row['Price']:,}\nSchools:{row['NearbySchools']}\nParks:{row['NearbyParks']}\nMarkets:{row['NearbyMarkets']}\nMasjid:{row['Masjid']}"
+        folium.Marker([row['Latitude'], row['Longitude']], popup=popup_text).add_to(m)
+    st_folium(m, width=700, height=500)
+
+# -----------------------------
 # AI ADVISOR
+# -----------------------------
 with tabs[2]:
-    st.subheader("🤖 Smart Property Advisor")
-    query = st.text_input("Ask anything (e.g. Best phase for investment?)")
+    st.subheader("🤖 AI Property Advisor")
+    query = st.text_input("Ask about DHA investment, ROI, construction:")
     if query:
-        st.info(f"Bilal Mughal's AI Insight: For '{query}', we recommend Phase 9 Prism due to 18.5% ROI.")
+        with st.spinner("Fetching AI advice..."):
+            if openai.api_key:
+                response = openai.ChatCompletion.create(
+                    model="gpt-4",
+                    messages=[{"role":"user","content":query}]
+                )
+                answer = response['choices'][0]['message']['content']
+                st.success(answer)
+            else:
+                st.warning("Add your OpenAI API Key in Streamlit Secrets!")
 
-# CALCULATOR
+# -----------------------------
+# CONSTRUCTION CALCULATOR + PDF + WHATSAPP
+# -----------------------------
 with tabs[3]:
-    st.subheader("🧮 Construction & Plot Calculator")
-    c_size = st.selectbox("Plot Size", ["5 Marla", "10 Marla", "1 Kanal"])
-    c_rate = st.number_input("Rate per Marla", value=1500000)
-    marla_val = {"5 Marla": 5, "10 Marla": 10, "1 Kanal": 20}
-    total_price = marla_val[c_size] * c_rate
-    st.success(f"Estimated Total Price: PKR {total_price:,.0f}")
+    st.subheader("🧮 Smart Construction Calculator")
+    size = st.selectbox("Plot Size", ["5 Marla","10 Marla","1 Kanal","2 Kanal","4 Marla","8 Marla"])
+    rate = st.number_input("Rate per Marla (PKR)", value=1000000)
+    sqft_map = {"5 Marla":1950,"10 Marla":3300,"1 Kanal":5500,"2 Kanal":11000,"4 Marla":1500,"8 Marla":3300}
+    area = sqft_map.get(size, 2000)
+    total = area * rate
+    st.markdown(f"""
+        <div style='border:2px dashed #003366; padding:20px; border-radius:10px; background:white;'>
+        <h3 style='text-align:center;'>BABAR REAL ESTATE</h3>
+        <p><b>Plot:</b> {size}</p>
+        <p><b>Area:</b> {area} sqft</p>
+        <hr>
+        <h3 style='text-align:right; color:#28a745;'>Total: PKR {total:,.0f}</h3>
+        </div>
+    """, unsafe_allow_html=True)
 
+    # PDF Generation
+    pdf_btn = st.button("Download PDF")
+    if pdf_btn:
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("Arial", 'B', 16)
+        pdf.cell(0, 10, "Babar Real Estate Construction Calculation", ln=True, align="C")
+        pdf.ln(10)
+        pdf.set_font("Arial", '', 12)
+        pdf.cell(0, 10, f"Plot Size: {size}", ln=True)
+        pdf.cell(0, 10, f"Area: {area} sqft", ln=True)
+        pdf.cell(0, 10, f"Total: PKR {total:,}", ln=True)
+        pdf.output("construction_calculation.pdf")
+        st.success("PDF Generated: construction_calculation.pdf")
+
+    # WhatsApp Share
+    wa_text = f"Plot Size: {size}\nArea: {area} sqft\nTotal: PKR {total:,}"
+    wa_url = f"https://wa.me/?text={urllib.parse.quote(wa_text)}"
+    st.markdown(f"[Share on WhatsApp]({wa_url})", unsafe_allow_html=True)
+
+# -----------------------------
 # ADMIN PANEL
+# -----------------------------
 with tabs[4]:
-    st.subheader("⚙️ CEO Management Portal")
-    user_id = st.text_input("User ID")
-    password = st.text_input("Password", type="password")
-    if st.button("Login"):
-        if user_id == "admin" and password == "babar123":
-            st.success("Welcome, Bilal Mughal! [CEO Mode Active]")
-            st.file_uploader("Upload New Inventory (CSV)")
-        else:
-            st.error("Invalid Credentials")
+    st.subheader("⚙️ Admin Control Panel")
+    pwd = st.text_input("Enter Admin Password", type="password")
+    if pwd == "babar123":
+        st.success("Welcome, CEO Babar Mughal")
+        st.file_uploader("Upload DHA CSV Data", type=["csv"])
+        st.button("Update Listings")
+    else:
+        st.warning("Password required to access management.")
 
-# --- 5. STICKY FOOTER ---
-st.markdown(f"<div class='wa-footer'>📞 Call/WhatsApp CEO Bilal Mughal: +92 324 4000041</div>", unsafe_allow_html=True)
+# -----------------------------
+# FOOTER
+# -----------------------------
+st.markdown(f"<div class='footer'>WhatsApp: <a href='https://wa.me/923244000041' style='color:white;'>Babar Mughal (+92 324 4000041)</a></div>", unsafe_allow_html=True)
