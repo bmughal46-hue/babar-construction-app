@@ -5,3 +5,4 @@ streamlit-folium
 Pillow
 openai
 fpdf
+plotly
