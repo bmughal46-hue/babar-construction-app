@@ -2,93 +2,91 @@ import streamlit as st
 import pandas as pd
 import os
 
-# --- 1. SETTINGS & THEME ---
-st.set_page_config(page_title="Babar Real Estate | CEO Bilal Mughal", layout="wide")
+# --- 1. SETTINGS ---
+st.set_page_config(page_title="Babar Real Estate | DHA Specialist", layout="wide")
 
+# --- 2. PREMIUM CSS ---
 st.markdown("""
 <style>
-    .stApp { background-color: #f0f2f5; }
-    /* Top Header Bar */
+    .stApp { background-color: #f8f9fa; }
     .main-header {
         background: linear-gradient(135deg, #002e5b 0%, #004080 100%);
         color: white; padding: 40px; text-align: center;
         border-radius: 0 0 30px 30px; border-bottom: 6px solid #c5a059;
-        margin-bottom: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        margin-bottom: 30px;
     }
-    /* Stats Cards */
     .stat-card {
-        background: white; padding: 25px; border-radius: 20px;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.08); border-top: 6px solid #c5a059;
-        text-align: center; transition: transform 0.3s;
+        background: white; padding: 20px; border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 5px solid #c5a059;
+        text-align: center;
     }
-    .stat-card:hover { transform: translateY(-5px); }
-    .stat-card h2 { color: #002e5b; margin: 10px 0; font-size: 38px; }
-    /* Sidebar */
+    .contact-box {
+        background: #002e5b; color: white; padding: 20px;
+        border-radius: 15px; border-left: 10px solid #c5a059;
+    }
     [data-testid="stSidebar"] { background-color: #002e5b; border-right: 4px solid #c5a059; }
-    .sidebar-text { color: white; text-align: center; font-weight: bold; }
 </style>
 """, unsafe_allow_html=True)
 
-# --- 2. SIDEBAR (Professional CEO Profile) ---
+# --- 3. SIDEBAR (CEO Profile) ---
 with st.sidebar:
-    st.markdown("<h2 class='sidebar-text'>CEO PORTAL</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='color:#c5a059; text-align:center;'>CEO PORTAL</h2>", unsafe_allow_html=True)
     
-    # Files handling for the specific names you uploaded
+    # Using your uploaded files
     profile_img = "3f4c835c-be62-407e-aa66-9aefc3ca48f5.jpg"
     logo_img = "images.jpeg"
     
     if os.path.exists(profile_img):
         st.image(profile_img, use_container_width=True)
     
-    st.markdown("<p class='sidebar-text'>Bilal Mughal</p>", unsafe_allow_html=True)
-    st.markdown("---")
+    st.markdown("<p style='color:white; text-align:center; font-weight:bold;'>Bilal Mughal</p>", unsafe_allow_html=True)
     
     if os.path.exists(logo_img):
-        st.image(logo_img, width=160)
+        st.image(logo_img, width=150)
     
     st.markdown("---")
-    # Interactive Search for Professionalism
-    st.subheader("Quick Search")
-    st.selectbox("Select Phase", ["DHA Phase 8", "DHA Phase 9 Prism", "DHA Phase 7", "DHA Phase 6"])
-    st.slider("Budget (Crores)", 1, 20, (3, 8))
+    st.write("📞 *Contact:* +92 300 xxxxxxx")
+    st.write("📍 *Office:* Phase 8 Broadway, Lahore")
 
-# --- 3. TOP NAVIGATION HEADER ---
+# --- 4. TOP HEADER ---
 st.markdown("""
 <div class='main-header'>
-    <h1 style='font-size: 50px; margin-bottom: 0;'>BABAR REAL ESTATE</h1>
-    <p style='color: #c5a059; font-size: 20px; font-weight: 300; letter-spacing: 3px;'>THE AUTHORITY IN DHA LAHORE BROADWAY</p>
+    <h1 style='margin:0; font-size:48px;'>BABAR REAL ESTATE</h1>
+    <p style='color:#c5a059; font-size:18px; letter-spacing:2px;'>YOUR TRUSTED PARTNER IN DHA LAHORE</p>
 </div>
 """, unsafe_allow_html=True)
 
-# --- 4. DASHBOARD STATS ---
-col1, col2, col3 = st.columns(3)
+# --- 5. TOP METRICS ---
+c1, c2, c3 = st.columns(3)
+with c1:
+    st.markdown("<div class='stat-card'><h3>Listings</h3><h2 style='color:#002e5b;'>1,240</h2><p style='color:green;'>+12 Today</p></div>", unsafe_allow_html=True)
+with c2:
+    st.markdown("<div class='stat-card'><h3>ROI Potential</h3><h2 style='color:#002e5b;'>18.5%</h2><p style='color:blue;'>High Growth</p></div>", unsafe_allow_html=True)
+with c3:
+    st.markdown("<div class='stat-card'><h3>Active Buyers</h3><h2 style='color:#002e5b;'>480+</h2><p style='color:orange;'>Trending</p></div>", unsafe_allow_html=True)
 
-with col1:
-    st.markdown("<div class='stat-card'><p style='color:#666;'>Market Inventory</p><h2>1,240</h2><p style='color:green; font-weight:bold;'>↑ 5% this month</p></div>", unsafe_allow_html=True)
-
-with col2:
-    st.markdown("<div class='stat-card'><p style='color:#666;'>Daily ROI Forecast</p><h2>18.5%</h2><p style='color:blue; font-weight:bold;'>Optimal Growth</p></div>", unsafe_allow_html=True)
-
-with col3:
-    st.markdown("<div class='stat-card'><p style='color:#666;'>Active Buyers</p><h2>480+</h2><p style='color:orange; font-weight:bold;'>Trending Now</p></div>", unsafe_allow_html=True)
-
-# --- 5. PROPERTY LISTINGS TABLE ---
+# --- 6. PROPERTY & CONTACT SECTION ---
 st.write("<br>", unsafe_allow_html=True)
-tab1, tab2 = st.tabs(["💎 Hot Deals (DHA)", "📈 Market Trends"])
+col_left, col_right = st.columns([2, 1])
 
-with tab1:
-    st.markdown("### 🏠 Featured Broadway & Phase 9 Inventory")
-    inventory_data = {
-        'Property Details': ['Phase 8 Broadway Commercial', 'Phase 9 Prism Sector A', 'Phase 7 Sector Z', 'Phase 6 Commercial'],
+with col_left:
+    st.subheader("🏠 Featured Inventory")
+    data = {
+        'Property': ['Phase 8 Broadway', 'Phase 9 Prism', 'Phase 7 Sector Z', 'Phase 6 Commercial'],
         'Size': ['4 Marla', '1 Kanal', '10 Marla', '8 Marla'],
-        'Demand (PKR)': ['8.50 Crore', '3.35 Crore', '1.85 Crore', '12.40 Crore'],
-        'ROI Status': ['Extreme High', 'High', 'Moderate', 'Very High']
+        'Demand': ['8.50 Crore', '3.35 Crore', '1.85 Crore', '12.40 Crore']
     }
-    st.table(pd.DataFrame(inventory_data))
+    st.table(pd.DataFrame(data))
 
-with tab2:
-    st.markdown("### 📊 Market Value Analysis")
-    st.line_chart(pd.DataFrame([1.2, 1.5, 1.8, 2.1, 2.8, 3.2, 3.5], columns=['Price Index (Crores)']))
+with col_right:
+    st.markdown("<div class='contact-box'><h3>Inquiry Form</h3><p>Submit for call-back</p></div>", unsafe_allow_html=True)
+    with st.form("contact_form"):
+        name = st.text_input("Name")
+        phone = st.text_input("Phone Number")
+        interest = st.selectbox("Interest", ["Buying", "Selling", "Investment Advice"])
+        submitted = st.form_submit_button("Send Request")
+        if submitted:
+            st.success("Request Sent! CEO Bilal Mughal will contact you.")
 
-# --- 6. FOOTER ---
-st.markdown("<br><hr><p style='text-align:center; color:#888;'>© 2026 Babar Real Estate | Premium Real Estate Management Portal</p>", unsafe_allow_html=True)
+# --- 7. FOOTER ---
+st.markdown("<br><hr><p style='text-align:center; color:#888;'>© 2026 Babar Real Estate | DHA Lahore Broadway Specialist</p>", unsafe_allow_html=True)
