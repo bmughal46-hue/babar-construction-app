@@ -6,7 +6,7 @@ from streamlit_folium import folium_static
 import folium
 
 # --- 1. CONFIG & STYLING ---
-st.set_page_config(page_title="Babar Real Estate | All Pakistan DHA", layout="wide")
+st.set_page_config(page_title="Babar Real Estate | DHA Specialist", layout="wide")
 
 st.markdown("""
 <style>
@@ -16,10 +16,10 @@ st.markdown("""
         color: white; padding: 40px; text-align: center;
         border-radius: 0 0 35px 35px; border-bottom: 6px solid #c5a059;
     }
-    .stat-card {
-        background: white; padding: 20px; border-radius: 15px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-left: 5px solid #c5a059;
-        text-align: center; margin-bottom: 10px;
+    .footer-box {
+        background-color: #002e5b; color: white; padding: 20px;
+        border-radius: 15px; margin-top: 30px; text-align: center;
+        border-top: 4px solid #c5a059;
     }
     .whatsapp-btn {
         background-color: #25D366; color: white; padding: 12px;
@@ -29,7 +29,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# --- 2. SIDEBAR (CEO Branding & Global Filters) ---
+# --- 2. SIDEBAR (CEO Branding & Smart Filters) ---
 with st.sidebar:
     st.markdown("<h2 style='color:#c5a059; text-align:center;'>CEO PORTAL</h2>", unsafe_allow_html=True)
     
@@ -37,72 +37,65 @@ with st.sidebar:
     if os.path.exists(profile_img):
         st.image(profile_img, use_container_width=True)
     
-    st.markdown("<p style='text-align:center; color:white;'><b>Bilal Mughal</b><br>DHA Specialist (All Pakistan)</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center; color:white; font-size:18px;'><b>Babar Mughal</b><br>CEO & Founder</p>", unsafe_allow_html=True)
     
-    whatsapp_url = "https://wa.me/923001234567" # Apna number yahan likhein
-    st.markdown(f'<a href="{whatsapp_url}" class="whatsapp-btn">💬 WhatsApp Inquiry</a>', unsafe_allow_html=True)
+    # Official WhatsApp
+    whatsapp_url = "https://wa.me/923244000041"
+    st.markdown(f'<a href="{whatsapp_url}" class="whatsapp-btn">💬 Chat on WhatsApp</a>', unsafe_allow_html=True)
     
     st.markdown("---")
-    selected_city = st.selectbox("Select City", ["Lahore", "Multan", "Bahawalpur", "Gujranwala", "Quetta"])
+    st.subheader("🔍 Property Finder")
+    city = st.selectbox("Select City", ["Lahore", "Multan", "Bahawalpur", "Gujranwala", "Quetta"])
     
-    if selected_city == "Lahore":
-        phases = [f"Phase {i}" for i in range(1, 14)] + ["Broadway", "Prism"]
+    # Phase Selection
+    if city == "Lahore":
+        phase = st.selectbox("Select Phase", [f"Phase {i}" for i in range(1, 14)] + ["Broadway", "Prism"])
+        block = st.selectbox("Select Block", ["Block A", "Block B", "Block C", "Commercial Broadway"])
     else:
-        phases = ["All Sectors", "Files Only", "Possession Plots"]
-        
-    st.selectbox("Select Phase/Sector", phases)
+        phase = st.selectbox("Select Sector", ["Sector A", "Sector B", "Sector C", "Files"])
+        block = st.selectbox("Select Category", ["1 Kanal", "10 Marla", "5 Marla", "Commercial"])
 
 # --- 3. TOP HEADER ---
 st.markdown(f"""
 <div class='main-header'>
     <h1 style='margin:0; font-size:45px;'>BABAR REAL ESTATE</h1>
-    <p style='color:#c5a059; font-size:18px; letter-spacing:3px;'>SPECIALIZED IN DHA {selected_city.upper()} & NATIONWIDE</p>
+    <p style='color:#c5a059; font-size:18px; letter-spacing:3px;'>OFFICIAL DEALER: DHA {city.upper()} & NATIONWIDE</p>
 </div>
 """, unsafe_allow_html=True)
 
-# --- 4. MAIN DASHBOARD ---
+# --- 4. MAIN CONTENT ---
 st.write("<br>", unsafe_allow_html=True)
-t1, t2, t3 = st.tabs(["📋 Nationwide Inventory", "📍 Map Locator", "📊 Market Analysis"])
+t1, t2, t3 = st.tabs(["📋 Inventory", "📍 Map View", "📊 Trends"])
 
 with t1:
-    col1, col2, col3, col4 = st.columns(4)
-    with col1: st.markdown("<div class='stat-card'><h4>DHA Lahore</h4><h2>Phase 1-13</h2></div>", unsafe_allow_html=True)
-    with col2: st.markdown("<div class='stat-card'><h4>DHA Multan</h4><h2>All Sectors</h2></div>", unsafe_allow_html=True)
-    with col3: st.markdown("<div class='stat-card'><h4>DHA Quetta</h4><h2>Smart City</h2></div>", unsafe_allow_html=True)
-    with col4: st.markdown("<div class='stat-card'><h4>DHA G.Wala</h4><h2>Active</h2></div>", unsafe_allow_html=True)
-    
-    st.subheader(f"🔥 Hot Deals in DHA {selected_city}")
-    # Sample Data based on your nationwide coverage
-    all_data = {
-        'City': ['Lahore', 'Multan', 'Bahawalpur', 'Gujranwala', 'Quetta'],
-        'Project': ['Phase 8 Broadway', 'Sector M', 'Phase 1', 'Commercial Area', 'Early Bird'],
-        'Size': ['4 Marla', '1 Kanal', '10 Marla', '8 Marla', '1 Kanal File'],
-        'Status': ['Possession', 'Allocation', 'Vanguard', 'Trading', 'Open File']
-    }
-    st.table(pd.DataFrame(all_data))
+    st.subheader(f"Available Plots: {city} {phase} ({block})")
+    # Sample Drill-down Data
+    sample_data = pd.DataFrame({
+        'Plot No': ['101', '55-C', '12', '99/1'],
+        'Type': ['Residential', 'Residential', 'Commercial', 'Residential'],
+        'Price': ['3.45 Crore', '1.90 Crore', '8.50 Crore', '2.15 Crore'],
+        'Status': ['Direct Deal', 'Available', 'Hot Listing', 'Available']
+    })
+    st.dataframe(sample_data, use_container_width=True)
 
 with t2:
-    st.subheader(f"📍 Location Overview: DHA {selected_city}")
-    # Coordinates change based on city selection
-    city_coords = {
-        "Lahore": [31.4697, 74.4500],
-        "Multan": [30.2858, 71.5300],
-        "Bahawalpur": [29.3550, 71.6911],
-        "Gujranwala": [32.1024, 74.1900],
-        "Quetta": [30.2500, 66.9500]
-    }
-    m = folium.Map(location=city_coords[selected_city], zoom_start=12)
-    folium.Marker(city_coords[selected_city], popup=f"DHA {selected_city} Center").add_to(m)
+    st.subheader("Strategic Location Map")
+    m = folium.Map(location=[31.4697, 74.4500], zoom_start=12)
+    # Broadway Office Marker
+    folium.Marker([31.4725, 74.4695], popup="Babar Real Estate - Plaza C-116", tooltip="Broadway Office").add_to(m)
     folium_static(m)
 
 with t3:
-    st.subheader("📈 Nationwide Investment Growth")
-    trend_df = pd.DataFrame({
-        'Project': ['Lahore P9', 'Multan', 'Bahawalpur', 'Quetta'],
-        'Yearly Growth %': [22, 15, 12, 18]
-    })
-    fig = px.bar(trend_df, x='Project', y='Yearly Growth %', color='Project', title="ROI Comparison")
+    st.subheader("Investment Growth Analysis")
+    trend_df = pd.DataFrame({'Month': ['Jan', 'Feb', 'Mar', 'Apr'], 'Growth': [10, 15, 18, 22]})
+    fig = px.area(trend_df, x='Month', y='Growth', title="Market Momentum")
     st.plotly_chart(fig, use_container_width=True)
 
-# --- 5. FOOTER ---
-st.markdown("<br><hr><p style='text-align:center; color:#888;'>All Pakistan DHA Property Consultants | Serving Lahore, Multan, Bahawalpur, Gujranwala & Quetta</p>", unsafe_allow_html=True)
+# --- 5. OFFICIAL FOOTER (With Address) ---
+st.markdown(f"""
+<div class='footer-box'>
+    <p><b>📍 Address:</b> DHA Phase 8 Broadway, Plaza No. C-116, Lahore, Pakistan</p>
+    <p><b>📞 WhatsApp:</b> +92 324 4000041 | <b>✉ CEO:</b> Babar Mughal</p>
+    <p style='font-size:12px; color:#ccc;'>© 2026 Babar Real Estate | All Rights Reserved</p>
+</div>
+""", unsafe_allow_html=True)
