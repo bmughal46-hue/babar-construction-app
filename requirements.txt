@@ -1,8 +1,0 @@
-streamlit
-pandas
-folium
-streamlit-folium
-Pillow
-openai
-fpdf
-plotly
