@@ -1,9 +1,12 @@
 import streamlit as st
 import pandas as pd
+import plotly.express as px
 import os
 
-# --- 1. ALL PAKISTAN DHA DATABASE (Google & Official Data) ---
-# Lahore, Multan, Bahawalpur, Gujranwala, Quetta ke saare blocks
+# --- 1. PAGE CONFIG ---
+st.set_page_config(page_title="Babar Real Estate | Official", layout="wide")
+
+# --- 2. DATABASE (Lahore Phases & Blocks) ---
 all_dha_data = {
     "Lahore": {
         "Phase 1": ["Block A", "Block B", "Block C", "Block D", "Block E", "Block F", "Block G", "Block H", "Block J", "Block K", "Block L", "Block M", "Block N", "Block P"],
@@ -22,75 +25,62 @@ all_dha_data = {
         "Phase 12 (EME)": ["Block A", "Block B", "Block C", "Block D", "Block E", "Block F", "Block G", "Block H", "Block J"],
         "Phase 13": ["Sector 1", "Sector 2", "Sector 3", "Sector 4", "Sector 5"]
     },
-    "Multan": {
-        "All Sectors": ["Sector A", "Sector B", "Sector C", "Sector D", "Sector E", "Sector F", "Sector G", "Sector H", "Sector I", "Sector K", "Sector L", "Sector M", "Sector N", "Sector P", "Sector Q", "Sector R", "Sector S", "Sector T", "Sector U", "Sector V", "Sector W", "Sector X", "Sector Y"]
-    },
-    "Bahawalpur": {
-        "Phase 1": ["Sector A", "Sector B", "Sector C", "Sector D", "Sector E", "Sector F", "Sector G", "Sector H", "Sector J"]
-    },
-    "Gujranwala": {
-        "Phase 1": ["Sector A", "Sector B", "Sector C", "Sector D", "Sector E", "Sector G", "Sector K", "Sector L", "Sector M"]
-    },
-    "Quetta": {
-        "Smart City": ["Sector A", "Sector B", "Sector C", "Early Bird", "Marketing Block"]
-    }
+    "Multan": {"Phase 1": ["Sector A", "Sector B", "Sector M", "Sector V"]},
+    "Quetta": {"Smart City": ["Early Bird", "Sector A"]}
 }
 
-# --- 2. SIDEBAR NAVIGATION ---
+# --- 3. SIDEBAR (CEO Branding) ---
 with st.sidebar:
-    st.markdown("<h2 style='color:#c5a059; text-align:center;'>Babar Real Estate</h2>", unsafe_allow_html=True)
-    
-    # User Profile
+    st.markdown("<h2 style='color:#c5a059; text-align:center;'>CEO PORTAL</h2>", unsafe_allow_html=True)
     profile_img = "3f4c835c-be62-407e-aa66-9aefc3ca48f5.jpg"
     if os.path.exists(profile_img):
         st.image(profile_img, use_container_width=True)
-    
     st.markdown("<p style='text-align:center; color:white;'><b>Babar Mughal</b><br>CEO & Founder</p>", unsafe_allow_html=True)
-    
-    # WhatsApp Direct
     st.markdown(f'<a href="https://wa.me/923244000041" style="background-color:#25D366; color:white; padding:10px; text-decoration:none; border-radius:8px; display:block; text-align:center;">💬 WhatsApp: 0324-4000041</a>', unsafe_allow_html=True)
     
     st.markdown("---")
-    st.subheader("🎯 Property Filter")
-    
-    # Step 1: Select City
     selected_city = st.selectbox("Select City", list(all_dha_data.keys()))
-    
-    # Step 2: Select Phase (Based on City)
-    city_phases = all_dha_data[selected_city]
-    selected_phase = st.selectbox(f"Select Phase in {selected_city}", list(city_phases.keys()))
-    
-    # Step 3: Select Block (Based on Phase)
-    available_blocks = city_phases[selected_phase]
-    selected_block = st.selectbox(f"Select Block", available_blocks)
+    selected_phase = st.selectbox(f"Select Phase", list(all_dha_data[selected_city].keys()))
+    selected_block = st.selectbox(f"Select Block", all_dha_data[selected_city][selected_phase])
 
-# --- 3. MAIN INTERFACE ---
+# --- 4. TOP BANNER (From Old Design) ---
 st.markdown(f"""
 <div style='background-color:#002e5b; color:white; padding:30px; text-align:center; border-radius:0 0 20px 20px; border-bottom: 5px solid #c5a059;'>
-    <h1>DHA {selected_city.upper()} PORTAL</h1>
-    <p>Viewing {selected_phase} > {selected_block}</p>
+    <h1 style='margin:0;'>BABAR REAL ESTATE</h1>
+    <p style='color:#c5a059;'>DHA LAHORE PROPERTY SPECIALIST</p>
 </div>
 """, unsafe_allow_html=True)
 
-st.write("<br>", unsafe_allow_html=True)
+# --- 5. MAIN DASHBOARD TABS (Connects Old & New) ---
+tab1, tab2, tab3 = st.tabs(["📊 Market Overview", "📋 Live Inventory", "📍 Map View"])
 
-# Plot Listing Section
-st.header(f"💎 Available Inventory in {selected_block}")
-# Sample inventory for each block
-plots_df = pd.DataFrame({
-    'Plot Number': ['12', '45', '109', '500'],
-    'Size': ['1 Kanal', '10 Marla', '1 Kanal', '5 Marla'],
-    'Category': ['Residential', 'Residential', 'Commercial', 'Residential'],
-    'Price': ['3.40 Crore', '1.80 Crore', '9.20 Crore', '1.15 Crore']
-})
-st.table(plots_df)
+with tab1:
+    # Purana Stats Section
+    col1, col2, col3 = st.columns(3)
+    with col1: st.metric("Active Listings", "1,240", "+12 Today")
+    with col2: st.metric("ROI Potential", "18.5%", "High Growth")
+    with col3: st.metric("Verified Buyers", "480+", "DHA Certified")
+    
+    # Purana Bar Chart
+    st.subheader("Investment Trends")
+    trend_df = pd.DataFrame({'Area': ['Phase 8', 'Phase 9', 'Prism', 'Broadway'], 'ROI %': [15, 18, 22, 12]})
+    fig = px.bar(trend_df, x='Area', y='ROI %', color='Area')
+    st.plotly_chart(fig, use_container_width=True)
 
-# --- 4. OFFICE FOOTER ---
-st.markdown(f"""
-<div style='background-color:#eee; padding:20px; border-radius:15px; margin-top:50px; border-left: 10px solid #002e5b;'>
-    <h3>📍 Head Office</h3>
-    <p><b>Babar Real Estate</b><br>
-    Plaza No. C-116, DHA Phase 8 Broadway, Lahore.<br>
-    <b>CEO:</b> Babar Mughal | <b>Contact:</b> 0324-4000041</p>
-</div>
-""", unsafe_allow_html=True)
+with tab2:
+    # Naya Drill-down Inventory Section
+    st.header(f"💎 Inventory: {selected_phase} ({selected_block})")
+    plots_df = pd.DataFrame({
+        'Plot Number': ['12', '45', '109', '500'],
+        'Size': ['1 Kanal', '10 Marla', '1 Kanal', '5 Marla'],
+        'Category': ['Residential', 'Residential', 'Commercial', 'Residential'],
+        'Price': ['3.40 Crore', '1.80 Crore', '9.20 Crore', '1.15 Crore']
+    })
+    st.table(plots_df)
+
+with tab3:
+    st.info("Interactive Map Loading... (DHA Phase 8 Broadway Focus)")
+    st.markdown("📍 *Office Location:* Plaza No. C-116, DHA Phase 8 Broadway, Lahore")
+
+# --- 6. FOOTER ---
+st.markdown("<br><hr><p style='text-align:center; color:#888;'>© 2026 Babar Real Estate | Serving All Pakistan DHA</p>", unsafe_allow_html=True)
