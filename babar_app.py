@@ -5,9 +5,10 @@ import plotly.express as px
 from streamlit_folium import folium_static
 import folium
 
-# --- 1. CONFIG & STYLING ---
-st.set_page_config(page_title="Babar Real Estate | DHA Lahore Specialist", layout="wide")
+# --- 1. SETTINGS ---
+st.set_page_config(page_title="Babar Real Estate | Premium Portal", layout="wide")
 
+# --- 2. THEME & STYLE ---
 st.markdown("""
 <style>
     .stApp { background-color: #f8f9fa; }
@@ -25,68 +26,68 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# --- 2. SIDEBAR (CEO Branding) ---
+# --- 3. SIDEBAR ---
 with st.sidebar:
     st.markdown("<h2 style='color:#c5a059; text-align:center;'>CEO PORTAL</h2>", unsafe_allow_html=True)
     
-    # Aapki files ke names
+    # Aapki files
     profile_img = "3f4c835c-be62-407e-aa66-9aefc3ca48f5.jpg"
     logo_img = "images.jpeg"
     
     if os.path.exists(profile_img):
         st.image(profile_img, use_container_width=True)
     
-    st.markdown("<p style='color:white; text-align:center;'><b>Bilal Mughal</b><br>Real Estate Expert</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color:white; text-align:center;'><b>Bilal Mughal</b><br>DHA Property Specialist</p>", unsafe_allow_html=True)
     
     if os.path.exists(logo_img):
         st.image(logo_img, width=150)
     
     st.markdown("---")
-    st.subheader("🔍 Fast Search")
-    st.selectbox("Select Phase", ["DHA Phase 8 Broadway", "DHA Phase 9 Prism", "DHA Phase 7"])
+    st.subheader("🔍 Quick Filters")
+    st.selectbox("Property Type", ["Residential Plots", "Commercial Broadway", "DHA Villas"])
 
-# --- 3. TOP HEADER ---
+# --- 4. TOP HEADER ---
 st.markdown("""
 <div class='main-header'>
     <h1 style='margin:0; font-size:50px;'>BABAR REAL ESTATE</h1>
-    <p style='color:#c5a059; letter-spacing:3px;'>DHA LAHORE PROPERTY SPECIALIST</p>
+    <p style='color:#c5a059; letter-spacing:3px;'>YOUR TRUSTED PARTNER IN DHA LAHORE</p>
 </div>
 """, unsafe_allow_html=True)
 
-# --- 4. DASHBOARD TABS ---
+# --- 5. DASHBOARD ---
 st.write("<br>", unsafe_allow_html=True)
-tab1, tab2, tab3 = st.tabs(["🏛 Inventory", "📍 Area Map", "📈 Market Trends"])
+tab1, tab2, tab3 = st.tabs(["📊 Inventory", "📍 Area Map", "📉 Growth Analysis"])
 
 with tab1:
     c1, c2, c3 = st.columns(3)
-    with c1: st.markdown("<div class='stat-card'><h3>Listings</h3><h2>1,240</h2><p style='color:green;'>+12 Today</p></div>", unsafe_allow_html=True)
-    with c2: st.markdown("<div class='stat-card'><h3>ROI</h3><h2>18.5%</h2><p style='color:blue;'>High</p></div>", unsafe_allow_html=True)
-    with c3: st.markdown("<div class='stat-card'><h3>Active</h3><h2>480+</h2><p style='color:orange;'>Buyers</p></div>", unsafe_allow_html=True)
+    with c1: st.markdown("<div class='stat-card'><h3>Active Listings</h3><h2>1,240</h2><p style='color:green;'>+12 Today</p></div>", unsafe_allow_html=True)
+    with c2: st.markdown("<div class='stat-card'><h3>ROI Potential</h3><h2>18.5%</h2><p style='color:blue;'>High Growth</p></div>", unsafe_allow_html=True)
+    with c3: st.markdown("<div class='stat-card'><h3>Verified Files</h3><h2>480+</h2><p style='color:orange;'>DHA Certified</p></div>", unsafe_allow_html=True)
     
     st.write("<br>", unsafe_allow_html=True)
-    st.subheader("🏠 Featured Inventory")
-    inv_df = pd.DataFrame({
-        'Location': ['Phase 8 Broadway', 'Phase 9 Prism', 'Phase 7 Sector Z', 'Phase 6'],
-        'Size': ['4 Marla Commercial', '1 Kanal Residential', '10 Marla', '2 Kanal'],
-        'Price': ['8.50 Crore', '3.35 Crore', '1.85 Crore', '14.2 Crore']
-    })
-    st.table(inv_df)
+    st.subheader("🏠 Featured Deals")
+    st.table(pd.DataFrame({
+        'Area': ['Phase 8 Broadway', 'Phase 9 Prism', 'Phase 7 Sector Z', 'Phase 6 Commercial'],
+        'Size': ['4 Marla', '1 Kanal', '10 Marla', '8 Marla'],
+        'Demand': ['8.50 Crore', '3.35 Crore', '1.85 Crore', '12.40 Crore']
+    }))
 
 with tab2:
-    st.subheader("📍 DHA Lahore Hotspots")
-    # Broadway Location Map
+    st.subheader("📍 DHA Lahore Strategic Map")
+    # Location for Phase 8 / Broadway area
     m = folium.Map(location=[31.4697, 74.4500], zoom_start=12)
-    folium.Marker([31.4725, 74.4695], popup="Babar Real Estate - Broadway").add_to(m)
+    folium.Marker([31.4725, 74.4695], popup="Broadway Commercial", tooltip="Broadway").add_to(m)
+    folium.Marker([31.4428, 74.4845], popup="Phase 9 Prism", tooltip="Prism").add_to(m)
     folium_static(m)
 
 with tab3:
-    st.subheader("📉 Pricing Trend Analysis")
-    trend = pd.DataFrame({
+    st.subheader("📈 Pricing Index (DHA Lahore)")
+    trend_data = pd.DataFrame({
         'Month': ['Jan', 'Feb', 'Mar', 'Apr'],
-        'Value': [2.8, 3.1, 3.35, 3.5]
+        'Price (Crore)': [2.9, 3.1, 3.35, 3.55]
     })
-    fig = px.area(trend, x='Month', y='Value', title="Phase 9 Prism Price Growth")
+    fig = px.line(trend_data, x='Month', y='Price (Crore)', markers=True)
     st.plotly_chart(fig, use_container_width=True)
 
-# --- 5. FOOTER ---
-st.markdown("<br><hr><p style='text-align:center; color:#888;'>© 2026 Babar Real Estate | Lahore, Pakistan</p>", unsafe_allow_html=True)
+# --- 6. FOOTER ---
+st.markdown("<br><hr><p style='text-align:center; color:#888;'>© 2026 Babar Real Estate | Specialized in Phase 8 & 9</p>", unsafe_allow_html=True)
