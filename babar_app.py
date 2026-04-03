@@ -1,86 +1,62 @@
 import streamlit as st
-import pandas as pd
-import plotly.express as px
-import os
 
-# --- 1. PAGE CONFIG ---
-st.set_page_config(page_title="Babar Real Estate | Official", layout="wide")
-
-# --- 2. DATABASE (Lahore Phases & Blocks) ---
-all_dha_data = {
-    "Lahore": {
-        "Phase 1": ["Block A", "Block B", "Block C", "Block D", "Block E", "Block F", "Block G", "Block H", "Block J", "Block K", "Block L", "Block M", "Block N", "Block P"],
-        "Phase 2": ["Block J", "Block K", "Block L", "Block M", "Block N", "Block P", "Block Q", "Block R", "Block S", "Block T"],
-        "Phase 3": ["Block W", "Block X", "Block Y", "Block Z"],
-        "Phase 4": ["Block AA", "Block BB", "Block CC", "Block DD", "Block EE", "Block FF", "Block GG"],
-        "Phase 5": ["Block A", "Block B", "Block C", "Block D", "Block E", "Block F", "Block G", "Block H", "Block J", "Block K", "Block L", "Block M"],
-        "Phase 6": ["Block A", "Block B", "Block C", "Block D", "Block E", "Block F", "Block G", "Block H", "Block J", "Block K", "Block L"],
-        "Phase 7": ["Block P", "Block Q", "Block R", "Block S", "Block T", "Block U", "Block V", "Block W", "Block X", "Block Y", "Block Z"],
-        "Phase 8": ["Block S", "Block T", "Block U", "Block V", "Block W", "Block X", "Block Y", "Ivy Green", "Ex-Air Avenue"],
-        "Phase 8 Broadway": ["Sector A", "Sector B", "Sector C", "Sector D", "Plaza C-116"],
-        "Phase 9 Prism": ["Block A", "Block B", "Block C", "Block D", "Block E", "Block F", "Block G", "Block H", "Block J", "Block K", "Block L", "Block M", "Block N", "Block P", "Block Q", "Block R"],
-        "Phase 9 Town": ["Block A", "Block B", "Block C", "Block D", "Block E"],
-        "Phase 10": ["Sector A", "Sector B", "Sector C"],
-        "Phase 11 (Rahbar)": ["Halloki Garden", "Phase 1", "Phase 2", "Phase 3"],
-        "Phase 12 (EME)": ["Block A", "Block B", "Block C", "Block D", "Block E", "Block F", "Block G", "Block H", "Block J"],
-        "Phase 13": ["Sector 1", "Sector 2", "Sector 3", "Sector 4", "Sector 5"]
-    },
-    "Multan": {"Phase 1": ["Sector A", "Sector B", "Sector M", "Sector V"]},
-    "Quetta": {"Smart City": ["Early Bird", "Sector A"]}
+# --- CONSTRUCTION LOGIC DATA ---
+# Average material required per marla (Standard Gray Structure)
+material_data = {
+    "Bricks": 4500,        # per marla
+    "Cement Bags": 90,     # per marla
+    "Sand (Cft)": 200,      # per marla
+    "Crush/Bajri (Cft)": 90, # per marla
+    "Steel (Tons)": 0.4     # per marla
 }
 
-# --- 3. SIDEBAR (CEO Branding) ---
-with st.sidebar:
-    st.markdown("<h2 style='color:#c5a059; text-align:center;'>CEO PORTAL</h2>", unsafe_allow_html=True)
-    profile_img = "3f4c835c-be62-407e-aa66-9aefc3ca48f5.jpg"
-    if os.path.exists(profile_img):
-        st.image(profile_img, use_container_width=True)
-    st.markdown("<p style='text-align:center; color:white;'><b>Babar Mughal</b><br>CEO & Founder</p>", unsafe_allow_html=True)
-    st.markdown(f'<a href="https://wa.me/923244000041" style="background-color:#25D366; color:white; padding:10px; text-decoration:none; border-radius:8px; display:block; text-align:center;">💬 WhatsApp: 0324-4000041</a>', unsafe_allow_html=True)
+with tab4: # Naya Tab: Babar Construction
+    st.header("🏗️ Babar Construction | Cost & Material Estimator")
+    st.info("Get precise estimates for your DHA Dream Home or Commercial Project.")
+
+    # Selection Row
+    col_a, col_b = st.columns(2)
+    with col_a:
+        p_type = st.selectbox("Project Type", ["Residential Home", "Commercial Building"])
+    with col_b:
+        p_size = st.selectbox("Plot Size", [
+            "3 Marla", "5 Marla", "7 Marla", "8 Marla", "10 Marla", 
+            "1 Kanal", "2 Kanal", "4 Kanal", "8 Marla Commercial", "4 Kanal Commercial"
+        ])
+
+    # Manual multiplier based on size
+    size_num = float(p_size.split()[0])
     
+    # Calculations
+    total_bricks = int(size_num * material_data["Bricks"])
+    total_cement = int(size_num * material_data["Cement Bags"])
+    total_steel = round(size_num * material_data["Steel (Tons)"], 2)
+    total_bajri = int(size_num * material_data["Crush/Bajri (Cft)"])
+
+    # Display Results in Cards
+    st.subheader(f"📊 Estimated Material for {p_size} {p_type}")
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Bricks (Awal)", f"{total_bricks:,}")
+    c2.metric("Cement Bags", f"{total_cement:,}")
+    c3.metric("Steel (Sarya)", f"{total_steel} Tons")
+    c4.metric("Crush (Bajri)", f"{total_bajri:,} Cft")
+
     st.markdown("---")
-    selected_city = st.selectbox("Select City", list(all_dha_data.keys()))
-    selected_phase = st.selectbox(f"Select Phase", list(all_dha_data[selected_city].keys()))
-    selected_block = st.selectbox(f"Select Block", all_dha_data[selected_city][selected_phase])
-
-# --- 4. TOP BANNER (From Old Design) ---
-st.markdown(f"""
-<div style='background-color:#002e5b; color:white; padding:30px; text-align:center; border-radius:0 0 20px 20px; border-bottom: 5px solid #c5a059;'>
-    <h1 style='margin:0;'>BABAR REAL ESTATE</h1>
-    <p style='color:#c5a059;'>DHA LAHORE PROPERTY SPECIALIST</p>
-</div>
-""", unsafe_allow_html=True)
-
-# --- 5. MAIN DASHBOARD TABS (Connects Old & New) ---
-tab1, tab2, tab3 = st.tabs(["📊 Market Overview", "📋 Live Inventory", "📍 Map View"])
-
-with tab1:
-    # Purana Stats Section
-    col1, col2, col3 = st.columns(3)
-    with col1: st.metric("Active Listings", "1,240", "+12 Today")
-    with col2: st.metric("ROI Potential", "18.5%", "High Growth")
-    with col3: st.metric("Verified Buyers", "480+", "DHA Certified")
     
-    # Purana Bar Chart
-    st.subheader("Investment Trends")
-    trend_df = pd.DataFrame({'Area': ['Phase 8', 'Phase 9', 'Prism', 'Broadway'], 'ROI %': [15, 18, 22, 12]})
-    fig = px.bar(trend_df, x='Area', y='ROI %', color='Area')
-    st.plotly_chart(fig, use_container_width=True)
+    # --- BRAND AWARENESS SECTION ---
+    st.subheader("🛠️ Recommended Premium Brands (Quality Awareness)")
+    st.write("Babar Construction recommends only the best for DHA structures:")
+    
+    brand_col1, brand_col2, brand_col3 = st.columns(3)
+    with brand_col1:
+        st.markdown("*Cement:*")
+        st.write("- Maple Leaf Cement\n- Bestway Cement\n- Lucky Cement")
+    with brand_col2:
+        st.markdown("*Steel (Grade 60):*")
+        st.write("- Ittehad Steel\n- Mughal Steel\n- Amreli Steels")
+    with brand_col3:
+        st.markdown("*Electric & Fittings:*")
+        st.write("- Pakistan Cables\n- Fast Cables\n- GM Cables")
 
-with tab2:
-    # Naya Drill-down Inventory Section
-    st.header(f"💎 Inventory: {selected_phase} ({selected_block})")
-    plots_df = pd.DataFrame({
-        'Plot Number': ['12', '45', '109', '500'],
-        'Size': ['1 Kanal', '10 Marla', '1 Kanal', '5 Marla'],
-        'Category': ['Residential', 'Residential', 'Commercial', 'Residential'],
-        'Price': ['3.40 Crore', '1.80 Crore', '9.20 Crore', '1.15 Crore']
-    })
-    st.table(plots_df)
-
-with tab3:
-    st.info("Interactive Map Loading... (DHA Phase 8 Broadway Focus)")
-    st.markdown("📍 *Office Location:* Plaza No. C-116, DHA Phase 8 Broadway, Lahore")
-
-# --- 6. FOOTER ---
-st.markdown("<br><hr><p style='text-align:center; color:#888;'>© 2026 Babar Real Estate | Serving All Pakistan DHA</p>", unsafe_allow_html=True)
+    # Call to Action
+    st.success(f"📞 Want a detailed quote for your {p_size} project? Contact CEO Bilal Mughal: 0324-4000041")
