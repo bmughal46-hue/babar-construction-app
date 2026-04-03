@@ -1,101 +1,75 @@
 import streamlit as st
 import pandas as pd
 import os
-import plotly.express as px
-from streamlit_folium import folium_static
-import folium
 
-# --- 1. CONFIG & STYLING ---
-st.set_page_config(page_title="Babar Real Estate | DHA Specialist", layout="wide")
+# --- 1. DATA DICTIONARY (Phases & Blocks) ---
+# Yahan hum saara data connect kar rahe hain
+dha_data = {
+    "Phase 1": ["Block A", "Block B", "Block C", "Block D", "Block E", "Block F", "Block G", "Block H", "Block J", "Block K", "Block L", "Block M", "Block N", "Block P"],
+    "Phase 2": ["Block J", "Block K", "Block L", "Block M", "Block N", "Block P", "Block Q", "Block R", "Block S", "Block T"],
+    "Phase 3": ["Block W", "Block X", "Block Y", "Block Z"],
+    "Phase 4": ["Block AA", "Block BB", "Block CC", "Block DD", "Block EE", "Block FF", "Block GG"],
+    "Phase 5": ["Block A", "Block B", "Block C", "Block D", "Block E", "Block F", "Block G", "Block H", "Block J", "Block K", "Block L", "Block M"],
+    "Phase 6": ["Block A", "Block B", "Block C", "Block D", "Block E", "Block F", "Block G", "Block H", "Block J", "Block K", "Block L"],
+    "Phase 7": ["Block P", "Block Q", "Block R", "Block S", "Block T", "Block U", "Block V", "Block W", "Block X", "Block Y", "Block Z"],
+    "Phase 8": ["Block S", "Block T", "Block U", "Block V", "Block W", "Block X", "Block Y", "Ivy Green", "Ex-Air Avenue", "Park View"],
+    "Broadway": ["Phase 8 Commercial", "CCA 1", "CCA 2", "Plaza C-116 Sector"],
+    "Phase 9 Prism": ["Block A", "Block B", "Block C", "Block D", "Block E", "Block F", "Block G", "Block H", "Block J", "Block K", "Block L", "Block M", "Block N", "Block P", "Block Q", "Block R"],
+    "Phase 9 Town": ["Block A", "Block B", "Block C", "Block D", "Block E"],
+    "Phase 10": ["Planning Stage", "Sector A", "Sector B"],
+    "Phase 11 (Rahbar)": ["Phase 1", "Phase 2", "Phase 3", "Phase 4"],
+    "Phase 12 (EME)": ["Block A", "Block B", "Block C", "Block D", "Block E", "Block F", "Block G", "Block H", "Block J"],
+    "Phase 13": ["Master Plan", "Sector 1", "Sector 2", "Sector 3"]
+}
 
-st.markdown("""
-<style>
-    .stApp { background-color: #f4f7f6; }
-    .main-header {
-        background: linear-gradient(135deg, #002e5b 0%, #0b5394 100%);
-        color: white; padding: 40px; text-align: center;
-        border-radius: 0 0 35px 35px; border-bottom: 6px solid #c5a059;
-    }
-    .footer-box {
-        background-color: #002e5b; color: white; padding: 20px;
-        border-radius: 15px; margin-top: 30px; text-align: center;
-        border-top: 4px solid #c5a059;
-    }
-    .whatsapp-btn {
-        background-color: #25D366; color: white; padding: 12px;
-        text-decoration: none; border-radius: 8px; font-weight: bold;
-        display: block; text-align: center; margin-top: 15px;
-    }
-</style>
-""", unsafe_allow_html=True)
-
-# --- 2. SIDEBAR (CEO Branding & Smart Filters) ---
+# --- 2. SIDEBAR NAVIGATION ---
 with st.sidebar:
     st.markdown("<h2 style='color:#c5a059; text-align:center;'>CEO PORTAL</h2>", unsafe_allow_html=True)
     
+    # User Branding
     profile_img = "3f4c835c-be62-407e-aa66-9aefc3ca48f5.jpg"
     if os.path.exists(profile_img):
         st.image(profile_img, use_container_width=True)
     
-    st.markdown("<p style='text-align:center; color:white; font-size:18px;'><b>Babar Mughal</b><br>CEO & Founder</p>", unsafe_allow_html=True)
-    
-    # Official WhatsApp
-    whatsapp_url = "https://wa.me/923244000041"
-    st.markdown(f'<a href="{whatsapp_url}" class="whatsapp-btn">💬 Chat on WhatsApp</a>', unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center; color:white;'><b>Babar Mughal</b><br>CEO & Founder</p>", unsafe_allow_html=True)
     
     st.markdown("---")
-    st.subheader("🔍 Property Finder")
-    city = st.selectbox("Select City", ["Lahore", "Multan", "Bahawalpur", "Gujranwala", "Quetta"])
+    st.subheader("📍 Precise Location Selector")
     
-    # Phase Selection
-    if city == "Lahore":
-        phase = st.selectbox("Select Phase", [f"Phase {i}" for i in range(1, 14)] + ["Broadway", "Prism"])
-        block = st.selectbox("Select Block", ["Block A", "Block B", "Block C", "Commercial Broadway"])
-    else:
-        phase = st.selectbox("Select Sector", ["Sector A", "Sector B", "Sector C", "Files"])
-        block = st.selectbox("Select Category", ["1 Kanal", "10 Marla", "5 Marla", "Commercial"])
+    # 1. City (Lahore for now)
+    city = "Lahore"
+    
+    # 2. Phase Selection
+    selected_phase = st.selectbox("Select Phase", list(dha_data.keys()))
+    
+    # 3. Dynamic Block Selection (Connects data based on Phase)
+    available_blocks = dha_data[selected_phase]
+    selected_block = st.selectbox(f"Select Block in {selected_phase}", available_blocks)
 
-# --- 3. TOP HEADER ---
+# --- 3. MAIN DISPLAY ---
+st.title(f"🏠 Babar Real Estate | {selected_phase} Specialist")
+st.info(f"Currently viewing: *{selected_phase}* > *{selected_block}*")
+
+# Statistics Section
+c1, c2, c3 = st.columns(3)
+with c1: st.metric("Market Status", "Hot", "+5%")
+with c2: st.metric("Avg Price (1 Kanal)", "3.50 Cr", "Trending")
+with c3: st.metric("Active Dealers", "480+", "Verified")
+
+# Inventory Table (Placeholder for Plot Details)
+st.subheader(f"Available Plots in {selected_block}")
+sample_plots = pd.DataFrame({
+    'Plot No': ['12', '45/A', '102-B', '500'],
+    'Size': ['1 Kanal', '10 Marla', '1 Kanal', '5 Marla'],
+    'Demand': ['3.40 Cr', '1.85 Cr', '3.55 Cr', '1.10 Cr'],
+    'Contact': ['WhatsApp CEO', 'WhatsApp CEO', 'WhatsApp CEO', 'WhatsApp CEO']
+})
+st.dataframe(sample_plots, use_container_width=True)
+
+# Contact Footer
 st.markdown(f"""
-<div class='main-header'>
-    <h1 style='margin:0; font-size:45px;'>BABAR REAL ESTATE</h1>
-    <p style='color:#c5a059; font-size:18px; letter-spacing:3px;'>OFFICIAL DEALER: DHA {city.upper()} & NATIONWIDE</p>
-</div>
-""", unsafe_allow_html=True)
-
-# --- 4. MAIN CONTENT ---
-st.write("<br>", unsafe_allow_html=True)
-t1, t2, t3 = st.tabs(["📋 Inventory", "📍 Map View", "📊 Trends"])
-
-with t1:
-    st.subheader(f"Available Plots: {city} {phase} ({block})")
-    # Sample Drill-down Data
-    sample_data = pd.DataFrame({
-        'Plot No': ['101', '55-C', '12', '99/1'],
-        'Type': ['Residential', 'Residential', 'Commercial', 'Residential'],
-        'Price': ['3.45 Crore', '1.90 Crore', '8.50 Crore', '2.15 Crore'],
-        'Status': ['Direct Deal', 'Available', 'Hot Listing', 'Available']
-    })
-    st.dataframe(sample_data, use_container_width=True)
-
-with t2:
-    st.subheader("Strategic Location Map")
-    m = folium.Map(location=[31.4697, 74.4500], zoom_start=12)
-    # Broadway Office Marker
-    folium.Marker([31.4725, 74.4695], popup="Babar Real Estate - Plaza C-116", tooltip="Broadway Office").add_to(m)
-    folium_static(m)
-
-with t3:
-    st.subheader("Investment Growth Analysis")
-    trend_df = pd.DataFrame({'Month': ['Jan', 'Feb', 'Mar', 'Apr'], 'Growth': [10, 15, 18, 22]})
-    fig = px.area(trend_df, x='Month', y='Growth', title="Market Momentum")
-    st.plotly_chart(fig, use_container_width=True)
-
-# --- 5. OFFICIAL FOOTER (With Address) ---
-st.markdown(f"""
-<div class='footer-box'>
-    <p><b>📍 Address:</b> DHA Phase 8 Broadway, Plaza No. C-116, Lahore, Pakistan</p>
-    <p><b>📞 WhatsApp:</b> +92 324 4000041 | <b>✉ CEO:</b> Babar Mughal</p>
-    <p style='font-size:12px; color:#ccc;'>© 2026 Babar Real Estate | All Rights Reserved</p>
+<div style='background-color:#002e5b; color:white; padding:20px; border-radius:15px; text-align:center;'>
+    <p><b>📍 Office:</b> Plaza No. C-116, DHA Phase 8 Broadway, Lahore</p>
+    <p><b>📞 Contact Babar Mughal:</b> 0324-4000041</p>
 </div>
 """, unsafe_allow_html=True)
