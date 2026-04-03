@@ -1,126 +1,118 @@
 import streamlit as st
-import pandas as pd
 
-# --- 1. GLOBAL SETTINGS & STYLING ---
-st.set_page_config(page_title="Babar Real Estate | CEO Portal", layout="wide", page_icon="🏗️")
+# --- 1. THEME & CUSTOM CSS (Zameen.com Style) ---
+st.set_page_config(page_title="Babar Real Estate | CEO Portal", layout="wide")
 
 st.markdown("""
     <style>
-    .main { background-color: #f8f9fa; }
-    .stMetric { background-color: #ffffff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-top: 5px solid #1a73e8; }
-    .css-10trblm { color: #1a73e8 !important; }
-    .sidebar .sidebar-content { background-image: linear-gradient(#2e3192, #1bffff); color: white; }
-    .z-header { font-size: 32px; font-weight: bold; color: #004d40; border-bottom: 3px solid #8bc34a; padding-bottom: 10px; margin-bottom: 20px; }
+    .main { background-color: #f0f2f5; }
+    .stMetric { background-color: #ffffff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-top: 5px solid #002e5b; }
+    .cost-card { 
+        background-color: #ffffff; padding: 20px; border-radius: 12px; 
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-left: 5px solid #c5a059; 
+        margin-bottom: 20px; 
+    }
+    .total-box { 
+        background: linear-gradient(135deg, #002e5b 0%, #0b5394 100%); 
+        color: white; padding: 30px; border-radius: 20px; 
+        text-align: center; border: 2px solid #c5a059; 
+    }
+    .sidebar .sidebar-content { background-color: #002e5b; color: white; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. SIDEBAR (CEO BRANDING & NAVIGATION) ---
+# --- 2. SIDEBAR (CEO BRANDING - BILAL MUGHAL) ---
 with st.sidebar:
     try:
-        st.image("images.jpeg", width=220, caption="BILAL MUGHAL - CEO")
+        st.image("images.jpeg", width=220) # Bilal Mughal CEO Pic
     except:
-        st.error("CEO Photo (images.jpeg) missing in GitHub!")
+        st.info("CEO Profile Picture 'images.jpeg' load ho rahi hai...")
     
-    st.title("Main Menu")
-    menu = st.radio("Go to:", [
+    st.title("BILAL MUGHAL")
+    st.markdown("<p style='color:#c5a059; font-weight:bold;'>CEO & Founder</p>", unsafe_allow_html=True)
+    st.write("---")
+    
+    menu = st.radio("NAVIGATION", [
         "Dashboard Home", 
-        "DHA Phase Tracker (All Cities)", 
-        "Material & Cost Calculator", 
-        "Factory Inventory & Rates", 
-        "VIP Client Database",
-        "Project Reports"
+        "DHA All Pakistan Tracker", 
+        "Construction Cost Optimizer", 
+        "Factory Inventory", 
+        "VIP Client Database"
     ])
     st.write("---")
-    st.markdown("### 📞 Helpline\n+92 300 1234567")
-    st.success("Server Status: Active 🟢")
+    st.success("System: Connected 🟢")
 
-# --- 3. DATA ENGINE ---
-market_rates = {"Bricks": 16.5, "Cement": 1320, "Steel": 272000, "Bajri": 118}
-
-# Comprehensive DHA Data
-dha_registry = {
-    "DHA Lahore": [f"Phase {i}" for i in range(1, 14)],
-    "DHA Bahawalpur": ["Sector A", "Sector B", "Sector C", "Sector N", "Villas"],
-    "DHA Multan": ["Sector A", "Sector H", "Sector M", "Sector R", "Rumanza"],
-    "DHA Quetta": ["Sector A", "Sector B", "Early Bird", "Smart City"],
-    "DHA Gujranwala": ["Phase 1", "Commercial Zone", "Executive Block"]
-}
-
-# --- 4. PAGE LOGIC ---
-
+# --- 3. DATA & LOGIC ---
 if menu == "Dashboard Home":
-    st.markdown('<div class="z-header">WELCOME TO BABAR REAL ESTATE PORTAL</div>', unsafe_allow_html=True)
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Total Active Projects", "24", "+2 New")
-    c2.metric("Total Clients", "1,450", "Active")
-    c3.metric("Inventory Value", "Rs. 4.2B", "+15%")
-    c4.metric("Market Sentiment", "Bullish 📈")
-    
-    st.image("https://images.unsplash.com/photo-1582408921715-18e7806365c1?auto=format&fit=crop&w=1200", caption="Zameen.com Style Property Insights")
+    st.title("🏛️ Babar Real Estate Executive Dashboard")
+    st.markdown("### Welcome back, Bilal Mughal.")
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Active Projects", "18", "+2")
+    col2.metric("Market Trend", "High", "DHA Lahore")
+    col3.metric("Pending Quotes", "5", "Action Required")
+    st.image("https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200", caption="Zameen Property Overview")
 
-elif menu == "DHA Phase Tracker (All Cities)":
-    st.markdown('<div class="z-header">📍 ALL PAKISTAN DHA TRACKER</div>', unsafe_allow_html=True)
-    city_col, phase_col = st.columns(2)
+elif menu == "DHA All Pakistan Tracker":
+    st.header("📍 All Pakistan DHA Phase & Block Tracker")
+    city = st.selectbox("Select City", ["Lahore", "Multan", "Bahawalpur", "Quetta", "Gujranwala"])
+    phase = st.selectbox("Select Phase", [f"Phase {i}" for i in range(1, 14)])
     
-    with city_col:
-        city = st.selectbox("Select City", list(dha_registry.keys()))
-    with phase_col:
-        phase = st.selectbox("Select Phase/Sector", dha_registry[city])
-    
-    st.write(f"### Showing Details for {city} - {phase}")
-    blocks = ["Block A", "Block B", "Block C", "Block D", "Block E"]
-    
-    cols = st.columns(3)
-    for i, b in enumerate(blocks):
-        with cols[i % 3]:
-            st.info(f"*{b}*")
-            st.write("Status: Possession / Developed")
-            st.write(f"Avg Price: Rs. {22 + i}.4 Million")
+    st.write(f"### {city} - {phase} Block Details")
+    c1, c2, c3 = st.columns(3)
+    for i, b in enumerate(["Block A", "Block B", "Block C", "Block D"]):
+        with [c1, c2, c3][i % 3]:
+            st.info(f"*{b}* - Possession Available")
 
-elif menu == "Material & Cost Calculator":
-    st.markdown('<div class="z-header">🏗️ MATERIAL & COST ESTIMATOR (APRIL 2026)</div>', unsafe_allow_html=True)
+elif menu == "Construction Cost Optimizer":
+    st.header("🏗️ Pro Construction Cost Optimizer")
     
-    unit = st.selectbox("Property Category:", [
-        "5 Marla Residential", "10 Marla Residential", "1 Kanal Residential", "2 Kanal Residential",
-        "4 Marla Commercial Building", "8 Marla Commercial Building", "16 Marla Commercial Building"
-    ])
-    
-    m_map = {"5 Marla": 5, "10 Marla": 10, "1 Kanal": 20, "2 Kanal": 40, "4 Marla Commercial": 10, "8 Marla Commercial": 20, "16 Marla Commercial": 40}
-    m = next((v for k, v in m_map.items() if k in unit), 10)
-    
-    st.write("---")
-    res = {"Bricks": 4600 * m, "Cement": 98 * m, "Steel": 0.48 * m, "Bajri": 110 * m}
-    
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Bricks (Qty)", f"{int(res['Bricks']):,}", f"Rs.{int(res['Bricks']*market_rates['Bricks']):,}")
-    c2.metric("Cement (Bags)", f"{int(res['Cement']):,}", f"Rs.{int(res['Cement']*market_rates['Cement']):,}")
-    c3.metric("Steel (Tons)", f"{res['Steel']:.2f}", f"Rs.{int(res['Steel']*market_rates['Steel']):,}")
-    c4.metric("Bajri (Cft)", f"{int(res['Bajri']):,}", f"Rs.{int(res['Bajri']*market_rates['Bajri']):,}")
+    col_inp1, col_inp2, col_inp3 = st.columns(3)
+    with col_inp1:
+        p_size = st.selectbox("Plot Size", [
+            "3 Marla", "5 Marla", "7 Marla", "8 Marla", "10 Marla", 
+            "16 Marla Building", "1 Kanal", "2 Kanal", "4 Kanal"
+        ])
+    with col_inp2:
+        quality = st.select_slider("Quality", options=["Economy", "Standard", "Premium"])
+    with col_inp3:
+        finish_type = st.radio("Scope", ["Grey Structure Only", "Full Finishing"])
 
-elif menu == "Factory Inventory & Rates":
-    st.markdown('<div class="z-header">🏭 BABAR FACTORY INVENTORY</div>', unsafe_allow_html=True)
-    st.table([
-        {"Item": "Awal Brick (Special)", "Stock": "500,000", "Current Rate": f"Rs. {market_rates['Bricks']}"},
-        {"Item": "Grade 60 Steel", "Stock": "120 Tons", "Current Rate": f"Rs. {market_rates['Steel']}"},
-        {"Item": "Premium Bajri (Sargodha)", "Stock": "5,000 Cft", "Current Rate": f"Rs. {market_rates['Bajri']}"}
-    ])
-    st.info("💡 Awareness: Commercial buildings require reinforced piling. Consult our engineer for 16 Marla projects.")
+    # Calculation logic
+    m_map = {"3 Marla":3, "5 Marla":5, "7 Marla":7, "8 Marla":8, "10 Marla":10, "16 Marla Building":25, "1 Kanal":20}
+    num_marlas = m_map.get(p_size, 10)
+    q_mult = {"Economy": 0.9, "Standard": 1.0, "Premium": 1.25}[quality]
+    
+    bricks = int(num_marlas * 4500 * q_mult)
+    cement = int(num_marlas * 95 * q_mult)
+    steel = round(num_marlas * 0.45 * q_mult, 2)
+    
+    grand_total = (bricks * 26) + (cement * 1280) + (steel * 270000)
+
+    st.markdown(f"""
+        <div class="total-box">
+            <h4 style="color:#c5a059; margin:0;">ESTIMATED PROJECT BUDGET</h4>
+            <h1 style="font-size:50px; margin:10px 0;">Rs. {int(grand_total):,}</h1>
+        </div>
+    """, unsafe_allow_html=True)
+
+    st.write("<br>", unsafe_allow_html=True)
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        st.markdown(f'<div class="cost-card"><h3>🧱 Bricks</h3><h2>{bricks:,}</h2></div>', unsafe_allow_html=True)
+    with c2:
+        st.markdown(f'<div class="cost-card"><h3>🧪 Cement</h3><h2>{cement:,}</h2></div>', unsafe_allow_html=True)
+    with c3:
+        st.markdown(f'<div class="cost-card"><h3>🏗️ Steel</h3><h2>{steel} T</h2></div>', unsafe_allow_html=True)
 
 elif menu == "VIP Client Database":
-    st.markdown('<div class="z-header">👥 EXECUTIVE CLIENTS</div>', unsafe_allow_html=True)
-    clients = [
-        {"Name": "Malik Riaz Ahmad", "Project": "Bahria Executive", "Category": "Gold"},
-        {"Name": "Mian Mansha Sahab", "Project": "Gulberg Greens", "Category": "Platinum"},
-        {"Name": "Sardar Usman Buzdar", "Project": "Taunsa Development", "Category": "Silver"},
-        {"Name": "Chaudhary Pervaiz Elahi", "Project": "Gujrat Industrial Zone", "Category": "Gold"}
-    ]
-    st.table(clients)
+    st.header("👥 Executive Client Database")
+    st.table([
+        {"Name": "Sheikh Nadeem Ahmad", "Project": "Crown City", "Status": "VIP"},
+        {"Name": "Chaudhary Mudasir", "Project": "Advocate Complex", "Status": "Active"},
+        {"Name": "Kiran Usman", "Project": "Express News Studio", "Status": "Completed"}
+    ])
 
-elif menu == "Project Reports":
-    st.markdown('<div class="z-header">📑 LIVE PROJECT STATUS</div>', unsafe_allow_html=True)
-    st.json({
-        "DHA Phase 6 Villa": "Finishing Stage",
-        "Bahawalpur Commercial Hub": "Structure Complete",
-        "Multan Rumanza Plot 12": "Land Clearing",
-        "Quetta Smart Block": "Planning Phase"
-    })
+elif menu == "Factory Inventory":
+    st.header("🏭 Factory Awareness & Rates")
+    st.write("Current Awal Brick Rate: *Rs. 26*")
+    st.write("Current Steel Rate: *Rs. 270,000 / Ton*")
