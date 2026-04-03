@@ -1,49 +1,58 @@
-# Construction Material Calculator - Babar Real Estate
+import streamlit as st
+
+# 1. Page Configuration
+st.set_page_config(page_title="Babar Real Estate", layout="wide")
+
+# 2. Construction Material Calculation Logic
 def get_material_estimates(size_label):
-    # Base calculation for 1 Marla (approximate values)
-    # Aap in ratios ko apni requirement ke mutabiq adjust kar sakte hain
+    # Base rates per Marla
     base_bricks = 4500
     base_cement = 90
-    base_steel = 0.4 # Tons
-    base_bajri = 90  # Cft
+    base_steel = 0.4
+    base_bajri = 90
 
-    # Mapping sizes to multipliers
-    # Yahan hum check karte hain ke kitne Marla ya Kanal hain
     multipliers = {
         "3 Marla": 3,
         "4 Marla": 4,
-        "4 Marla Building": 5.5,    # Building ke liye extra material
+        "4 Marla Building": 5.5,
         "5 Marla": 5,
         "7 Marla": 7,
         "8 Marla": 8,
-        "8 Marla Building": 10.5,   # Building ke liye extra
+        "8 Marla Building": 10.5,
         "10 Marla": 10,
-        "16 Marla Building": 20,    # Multi-story or large area
-        "1 Kanal": 20,              # 1 Kanal = 20 Marla
+        "16 Marla Building": 20,
+        "1 Kanal": 20,
         "2 Kanal": 40,
         "4 Kanal": 80,
-        "4 Kanal Commercial": 100   # Commercial projects require more strength
+        "4 Kanal Commercial": 100
     }
 
     m = multipliers.get(size_label, 0)
-
-    results = {
+    
+    return {
         "Bricks": int(base_bricks * m),
         "Cement": int(base_cement * m),
         "Steel": round(base_steel * m, 2),
         "Bajri": int(base_bajri * m)
     }
-    return results
 
-# --- List for your Dropdown Menu ---
-all_options = [
+# 3. User Interface
+st.title("BABAR REAL ESTATE & CONSTRUCTION")
+
+options = [
     "3 Marla", "4 Marla", "4 Marla Building", "5 Marla", 
     "7 Marla", "8 Marla", "8 Marla Building", "10 Marla", 
     "16 Marla Building", "1 Kanal", "2 Kanal", 
     "4 Kanal", "4 Kanal Commercial"
 ]
 
-# Example Usage:
-selected = "5 Marla" # User yahan se select karega
-data = get_material_estimates(selected)
-print(f"Results for {selected}: {data}")
+selected_size = st.selectbox("Select Property Size:", options)
+
+if selected_size:
+    res = get_material_estimates(selected_size)
+    
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Bricks (Awal)", f"{res['Bricks']:,}")
+    col2.metric("Cement Bags", f"{res['Cement']:,}")
+    col3.metric("Steel (Tons)", f"{res['Steel']}")
+    col4.metric("Bajri (Cft)", f"{res['Bajri']:,}")
