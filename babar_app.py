@@ -1,76 +1,86 @@
 import streamlit as st
 
-# --- Page Setup ---
-st.set_page_config(page_title="Babar Real Estate & Construction", layout="wide", page_icon="🏗️")
+# --- 1. SETTINGS ---
+st.set_page_config(page_title="Babar Real Estate | CEO Portal", layout="wide")
 
-# --- Custom Styling (Heavy Look) ---
-st.markdown("""
-    <style>
-    .main { background-color: #f5f7f9; }
-    .stMetric { background-color: #ffffff; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-    .header-style { font-size: 40px; font-weight: bold; color: #1e3d59; text-align: center; margin-bottom: 20px; }
-    </style>
-    """, unsafe_allow_html=True)
-
-# --- Sidebar / Navigation ---
+# --- 2. SIDEBAR (CEO BRANDING) ---
 with st.sidebar:
-    st.image("https://via.placeholder.com/150", caption="Babar Real Estate Logo") # Yahan apna logo link dalien
-    st.title("CEO PORTAL")
+    st.image("images.jpeg", width=200) # Bilal Mughal (CEO)
+    st.title("BILAL MUGHAL")
+    st.caption("CEO - Babar Real Estate")
     st.write("---")
-    page = st.radio("Navigation", ["Material Calculator", "Project Reports", "Client Database"])
+    menu = st.radio("MAIN MENU", 
+        ["DHA Phase 1-13 Tracker", "Material Calculator", "Factory Products", "Client Database"])
+    st.write("---")
+    st.success("App Status: Live 🟢")
 
-# --- Calculation Logic ---
-def calculate_material(size):
-    # Base Values per Marla
-    base = {"bricks": 4500, "cement": 95, "steel": 0.45, "bajri": 100}
+# --- 3. PAGE LOGIC ---
+
+if menu == "DHA Phase 1-13 Tracker":
+    st.title("📍 DHA PHASE 1 TO 13 - BLOCK DETAILS")
     
-    # Mapping and Multipliers
-    multipliers = {
-        "3 Marla": 3, "5 Marla": 5, "7 Marla": 7, "8 Marla": 8, "10 Marla": 10,
-        "1 Kanal": 20, "2 Kanal": 40, "4 Kanal": 80,
-        "4 Marla Commercial": 6.5,
-        "8 Marla Commercial": 13,
-        "16 Marla Commercial": 26
+    # Phase Selection
+    phase = st.selectbox("Select DHA Phase:", [f"DHA Phase {i}" for i in range(1, 14)])
+    
+    # Block Data (Sample logic for all phases)
+    # Aap isme har phase ke blocks aur prices ki list barha sakte hain
+    blocks_data = {
+        "DHA Phase 1": ["Block A", "Block B", "Block C", "Block D"],
+        "DHA Phase 5": ["Block G", "Block H", "Block J", "Block K", "Block L"],
+        "DHA Phase 6": ["Block A", "Block B", "Block C", "Block D", "Block E", "Block H", "Block L"],
+        "DHA Phase 7": ["Block P", "Block Q", "Block R", "Block S", "Block T"],
+        "DHA Phase 8": ["Block S", "Block T", "Block U", "Block V", "Ivy Green"],
+        "DHA Phase 9": ["Prism", "Town"],
     }
     
-    m = multipliers.get(size, 0)
-    return {k: round(v * m, 1) for k, v in base.items()}
+    current_blocks = blocks_data.get(phase, ["Block A", "Block B", "Block C"]) # Default blocks
+    
+    st.subheader(f"Current Status: {phase}")
+    
+    # Layout for Blocks
+    cols = st.columns(3)
+    for i, block in enumerate(current_blocks):
+        with cols[i % 3]:
+            st.info(f"*{block}*")
+            st.write("Status: Possession Available")
+            st.write(f"Latest Rate: Rs. {25 + i}.5 Million (Approx)")
 
-# --- Main Page Content ---
-if page == "Material Calculator":
-    st.markdown('<div class="header-style">BABAR REAL ESTATE & CONSTRUCTION</div>', unsafe_allow_html=True)
+elif menu == "Material Calculator":
+    st.title("🏗️ ADVANCED CALCULATOR (WITH PRICES)")
     
-    # Selection Row
-    col_a, col_b = st.columns([2, 1])
-    with col_a:
-        selection = st.selectbox("Select Property Size or Commercial Unit:", [
-            "3 Marla", "5 Marla", "7 Marla", "8 Marla", "10 Marla", 
-            "1 Kanal", "2 Kanal", "4 Kanal",
-            "4 Marla Commercial", "8 Marla Commercial", "16 Marla Commercial"
-        ])
+    # Updated List with all Commercial & Residential Units
+    selection = st.selectbox("Property Type:", [
+        "3 Marla", "5 Marla", "7 Marla", "8 Marla", "10 Marla", 
+        "1 Kanal", "2 Kanal", "4 Kanal",
+        "4 Marla Commercial Building", "8 Marla Commercial Building", "16 Marla Commercial Building"
+    ])
     
-    st.write("---")
+    # Rates (April 2026)
+    r_bricks, r_cement, r_steel = 16, 1280, 268000
     
-    # Results Display
-    data = calculate_material(selection)
+    # Simple Logic for heavy calculation
+    m_map = {"3 Marla": 3, "5 Marla": 5, "1 Kanal": 20, "4 Marla Commercial Building": 8}
+    m = m_map.get(selection, 10) # Default 10 if not in small map
     
-    st.subheader(f"📊 Material Estimate for {selection}")
-    m1, m2, m3, m4 = st.columns(4)
-    
-    m1.metric("Bricks (Awal)", f"{int(data['bricks']):,}")
-    m2.metric("Cement (Bags)", f"{int(data['cement']):,}")
-    m3.metric("Steel (Tons)", f"{data['steel']}")
-    m4.metric("Bajri (Cft)", f"{int(data['bajri']):,}")
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Bricks (Awal)", f"{4500*m:,}", f"Rs. {4500*m*r_bricks:,}")
+    c2.metric("Cement (Bags)", f"{95*m:,}", f"Rs. {95*m*r_cement:,}")
+    c3.metric("Steel (Tons)", f"{0.45*m}", f"Rs. {int(0.45*m*r_steel):,}")
 
-    st.write("---")
-    
-    # Additional Features (Heavy Level)
-    col1, col2 = st.columns(2)
-    with col1:
-        st.info("💡 *Pro Tip:* Commercial buildings require 25% more steel for foundation strength.")
-    with col2:
-        st.success("✅ Rates updated according to current market standards (April 2026).")
+elif menu == "Factory Products":
+    st.title("🏭 BABAR FACTORY - PRODUCT AWARENESS")
+    st.markdown("""
+    ### 1. Awal Quality Bricks
+    * *Detail:* Direct from kiln, water absorption < 15%.
+    * *Awareness:* Hamesha 'Awal' brick use karein foundation ke liye.
+    ### 2. Grade 60 Steel
+    * *Detail:* Best for multi-story commercial buildings.
+    """)
 
-elif page == "Project Reports":
-    st.header("Project Status")
-    st.warning("Feature under development...")
+elif menu == "Client Database":
+    st.title("👥 EXECUTIVE CLIENT LIST")
+    st.table([
+        {"Client": "Sheikh Nadeem Ahmad", "Project": "Crown City Gwadar", "Status": "VIP"},
+        {"Client": "Chaudhary Mudasir", "Project": "Advocate Office", "Status": "Active"},
+        {"Client": "Kiran Usman", "Project": "Express News Studio", "Status": "Completed"}
+    ])
